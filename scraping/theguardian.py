@@ -32,7 +32,7 @@ def theguardian_scrape(entity, start_date, end_date):
         total_pages = data['response']['pages']
     
     # parse results into dataframe
-    column_names = ["date_time", "title", "description", "article_url"]
+    column_names = ["date_time", "title", "excerpt", "article_url"]
     df = pd.DataFrame(columns = column_names)
 
     for result in all_results:
@@ -44,17 +44,15 @@ def theguardian_scrape(entity, start_date, end_date):
         title_text = result["webTitle"]
         article_url = result["webUrl"]
 
-        # retrieve description
-        description = result["fields"]["bodyText"]
+        # retrieve excerpt
+        excerpt = result["fields"]["bodyText"]
 
         # add information to dataframe
         df = df.append({"date_time": date_time, "title": title_text, \
-                "description": description, "article_url": article_url
+                "excerpt": excerpt, "article_url": article_url
             }, ignore_index=True)
     
     return df
-
-
 
 # entity = "ethereum"
 # start_date = datetime(2019, 1, 17)
