@@ -13,7 +13,7 @@ def cryptonews_scrape(entity, start_date, end_date):
     chrome_options.add_experimental_option("prefs", prefs)
     
     # create driver
-    driver = webdriver.Chrome('./chromedriver', options=chrome_options)
+    driver = webdriver.Chrome('./utils/chromedriver', options=chrome_options)
 
     # search for webpage
     search = "https://cryptonews.com/search/articles.htm?q=" + entity
@@ -76,8 +76,8 @@ def cryptonews_scrape(entity, start_date, end_date):
     driver.quit()
     return df
 
-# entity = "ethereum"
-# start_date = datetime(2020, 7, 17)
-# end_date = datetime(2020, 8, 10)
-# df = cryptonews_scrape(entity, start_date, end_date)
-# print(df)
+entity = "ethereum"
+start_date = datetime(2020, 7, 17)
+end_date = datetime(2020, 8, 10)
+df = cryptonews_scrape(entity, start_date, end_date)
+print(df)
