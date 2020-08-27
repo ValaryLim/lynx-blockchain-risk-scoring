@@ -113,7 +113,7 @@ def cryptoslate_scrape(entity, start_date, end_date):
     return df_filtered
 
 # testing function
-start_date = datetime(2020, 8, 20)
-end_date = datetime(2020, 8, 26)
-test = cryptoslate_scrape("bitcoin", start_date, end_date)
-print(test)
+# start_date = datetime(2020, 8, 20)
+# end_date = datetime(2020, 8, 26)
+# test = cryptoslate_scrape("bitcoin", start_date, end_date)
+# print(test)

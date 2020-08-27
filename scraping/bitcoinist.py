@@ -117,7 +117,7 @@ def bitcoinist_scrape(entity, start_date, end_date):
 
     # filter by date
     df_filtered = df.loc[df['date_time'] >= start_date]
-    df_filtered = df_filtered.loc[df['date_time'] <= end_date]
+    df_filtered = df_filtered.loc[df['date_time'] <= end_date].reset_index(drop=True)
 
     return df_filtered
 
