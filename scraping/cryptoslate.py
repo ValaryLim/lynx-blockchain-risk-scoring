@@ -106,10 +106,14 @@ def cryptoslate_scrape(entity, start_date, end_date):
     # add date_time column to df
     df['date_time'] = datetime_lst
 
-    return df
+    # filter by date
+    df_filtered = df.loc[df['date_time'] >= start_date]
+    df_filtered = df_filtered.loc[df['date_time'] <= end_date].reset_index(drop=True)
+
+    return df_filtered
 
 # testing function
-# start_date = datetime(2020, 8, 24)
-# end_date = datetime(2020, 8, 26)
-# test = cryptoslate_scrape("bitcoin", start_date, end_date)
-# print(test)
+start_date = datetime(2020, 8, 20)
+end_date = datetime(2020, 8, 26)
+test = cryptoslate_scrape("bitcoin", start_date, end_date)
+print(test)
