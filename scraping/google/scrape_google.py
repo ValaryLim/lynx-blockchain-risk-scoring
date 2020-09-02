@@ -60,6 +60,10 @@ def date_convert(day):
         return datetime.strptime((date.today() - relativedelta(weeks=+3)).strftime('%Y%m%d'), '%Y%m%d')
     elif day == '2 weeks ago':
         return datetime.strptime((date.today() - relativedelta(weeks=+2)).strftime('%Y%m%d'), '%Y%m%d')
+    elif day[2:5] == 'day':
+        return datetime.strptime((date.today() - relativedelta(days=+ int(day[0]))).strftime('%Y%m%d'), '%Y%m%d')
+    elif (day[2:6] == 'hour') | (day[3:7] == 'hour'):
+        return datetime.strptime(date.today().strftime('%Y%m%d'), '%Y%m%d')  
     else:
         return datetime.strptime(day, '%b %d, %Y')
 
