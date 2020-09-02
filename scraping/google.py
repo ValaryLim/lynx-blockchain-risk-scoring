@@ -8,8 +8,8 @@ from dateutil.relativedelta import *
 def google_scrape(entity, start_date, end_date):
     
     '''
-    Scrap (using GoogleNews API) the top 10 headlines of google news on a particular entity, for a given time range
-    Output : Pandas Dataframe with title, short summary, date & url column
+    Scrap (using GoogleNews API) the top 10 headlines of google news on a particular entity, weekly, over a given time range
+    Output : Pandas Dataframe with datetime, title, excerpt, domain (news origin), and article url
     '''
     # calculate the number of weeks between start and end date (inclusive)
     n_periods = (end_date - start_date).days // 7 + 2
@@ -48,6 +48,9 @@ def google_scrape(entity, start_date, end_date):
 
         # combine result df
         result_df = pd.concat([result_df, temp_df])
+
+        # clear news before moving to next query
+        news.clear()
     
     return result_df
 
