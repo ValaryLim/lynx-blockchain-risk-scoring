@@ -1,5 +1,5 @@
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from google import google_scrape
 from theguardian import theguardian_scrape
@@ -51,9 +51,30 @@ def conventional_scrape(entity_list, start_date, end_date):
 
     return result_df
 
-# entity = "ethereum"
-# start_date = datetime(2019, 8, 1, 0, 0, 0)
-# end_date = datetime(2020, 9, 2, 23, 59, 59)
-# entity_list = ["binance", "ethereum", "upbit"]
-# print(conventional_scrape_by_entity(entity="ethereum", start_date=start_date, end_date=end_date))
-# print(conventional_scrape(entity_list=entity_list, start_date=start_date, end_date=end_date))
+def retrieve_cases(file, time_frame=7):
+    hacks_list = pd.read_csv(file, header=0)
+    hacks_list = hacks_list.dropna(how="all")
+    hacks_list = hacks_list.fillna('')
+
+    for index, hack in hacks_list.iterrows():
+        start_date =  datetime.strptime(hack["start_date"], '%Y-%m-%d')
+        end_date = start_date + timedelta(days=time_frame)
+        entity1 = hack["exchange"]
+        entity2 = hack["coin"]
+
+        if entity1 and entity2: 
+            temp_df = conventional_scrape([entity1, entity2], start_date, end_date)
+        elif entity1: 
+            temp_df = conventional_scrape_by_entity(entity1, start_date, end_date)
+        else: 
+            temp_df = conventional_scrape_by_entity(entity2, start_date, end_date)
+        
+        if index == 0: 
+            result_df = temp_df
+        else: 
+            result_df = pd.concat([result_df, temp_df])
+    
+    return result_df
+    
+# df = retrieve_cases("data/hacks_list.csv", time_frame=7)
+# df.to_csv("data/conventional_positive.csv")

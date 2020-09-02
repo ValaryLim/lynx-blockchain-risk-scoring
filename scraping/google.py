@@ -25,6 +25,9 @@ def google_scrape(entity, start_date, end_date):
     # Only get headlines which mention the entity of interest
     df=df[df['title'].str.contains(entity,flags=re.IGNORECASE)].reset_index(drop=True)
     df['date_time'] = df.date_time.apply(date_convert)
+
+    # remove rows without datetime
+    df = df.dropna(axis=0, subset=["date_time"])
     
     return df
 
@@ -39,9 +42,13 @@ def date_convert(day):
     elif (day[2:6] == 'hour') | (day[3:7] == 'hour'):
         return datetime.strptime(date.today().strftime('%Y%m%d'), '%Y%m%d')  
     else:
-        return datetime.strptime(day, '%b %d, %Y')
+        try:
+            return datetime.strptime(day, '%b %d, %Y')
+        except:
+            return None
 
-# start_date = datetime(2020, 7, 27)
-# end_date = datetime(2020, 9, 1)
-# test = google_scrape("Binance", start_date, end_date)
+# start_date = datetime(2018, 5, 22, 0, 0, 0)
+# end_date = datetime(2018, 5, 23, 23, 59, 59)
+# test = google_scrape("Ethereum", start_date, end_date)
 # print(test)
+
