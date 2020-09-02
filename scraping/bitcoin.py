@@ -52,7 +52,7 @@ def bitcoin_scrape(entity, start_date, end_date):
     return output
 
 # testing function
-# start_date = datetime(2020, 8, 24)
-# end_date = datetime(2020, 8, 26)
+# start_date = datetime(2020, 8, 20)
+# end_date = datetime(2020, 8, 30)
 # test = bitcoin_scrape("bitcoin", start_date, end_date)
 # print(test)

@@ -12,7 +12,7 @@ def bitcoinist_scrape(entity, start_date, end_date):
     driver = webdriver.Chrome('./utils/chromedriver')
 
     # search for webpage
-    url = "https://bitcoinist.com/?s={}&lang=en".format('bitcoin')
+    url = "https://bitcoinist.com/?s={}&lang=en".format(entity)
     driver.get(url)
 
     # preliminary search of all articles
@@ -122,7 +122,7 @@ def bitcoinist_scrape(entity, start_date, end_date):
     return df_filtered
 
 # testing function
-# start_date = datetime(2020, 8, 25)
-# end_date = datetime(2020, 8, 26)
+# start_date = datetime(2020, 8, 20)
+# end_date = datetime(2020, 8, 30)
 # test = bitcoinist_scrape("bitcoin", start_date, end_date)
 # print(test)

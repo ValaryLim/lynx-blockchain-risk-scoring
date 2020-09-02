@@ -2,3 +2,5 @@
 
 scraping/data
 scraping/utils
+
+scraping/__pycache__
