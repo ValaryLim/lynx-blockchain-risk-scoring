@@ -25,7 +25,7 @@ def forbes_scrape(entity, start_date, end_date):
     timestamp_info = last_article.find_element_by_class_name('stream-item__date')
     timestamp = int(timestamp_info.get_attribute('data-date'))
     last_date = datetime.fromtimestamp(timestamp/1000)
-    print(last_date)
+    # print(last_date)
 
 
     #While date of last article on page is after start_date, loop     
