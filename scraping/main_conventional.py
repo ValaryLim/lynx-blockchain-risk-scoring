@@ -74,7 +74,10 @@ def retrieve_cases(file, time_frame=7):
         else: 
             result_df = pd.concat([result_df, temp_df])
     
+    # remove duplicates of title, excerpt
+    result_df.drop_duplicates(subset =["title", "excerpt"], keep = False, inplace = True) 
+
     return result_df
     
-# df = retrieve_cases("data/hacks_list.csv", time_frame=7)
-# df.to_csv("data/conventional_positive.csv")
+df = retrieve_cases("data/hacks_list.csv", time_frame=7)
+df.to_csv("data/conventional_positive_unfiltered.csv")
