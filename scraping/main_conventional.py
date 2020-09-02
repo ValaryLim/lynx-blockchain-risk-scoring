@@ -39,6 +39,7 @@ def conventional_scrape_by_entity(entity, start_date, end_date):
 def conventional_scrape(entity_list, start_date, end_date):
     result_df = pd.DataFrame()
     for i in range(len(entity_list)):
+        print(entity_list[i])
         temp_df = conventional_scrape_by_entity(entity=entity_list[i], start_date=start_date, end_date=end_date)
         temp_df["entity"] = entity_list[i]
         if i == 0:
@@ -48,6 +49,9 @@ def conventional_scrape(entity_list, start_date, end_date):
     
     # drop columns where all rows are nan
     result_df = result_df.dropna(axis=1, how='all')
+
+    # remove duplicates of title, excerpt
+    result_df.drop_duplicates(subset =["title", "excerpt"], keep = False, inplace = True) 
 
     return result_df
 
@@ -78,6 +82,17 @@ def retrieve_cases(file, time_frame=7):
     result_df.drop_duplicates(subset =["title", "excerpt"], keep = False, inplace = True) 
 
     return result_df
-    
-df = retrieve_cases("data/hacks_list.csv", time_frame=7)
-df.to_csv("data/conventional_positive_unfiltered.csv")
+
+#### UNCOMMENT TO RETRIEVE POSITIVE TEST CASES ####
+# df = retrieve_cases("data/hacks_list.csv", time_frame=7)
+# df.to_csv("data/conventional_positive_unfiltered.csv")
+###################################################
+
+#### UNCOMMENT TO RETRIEVE NEGATIVE TEST CASES ####
+start_date = datetime(2018, 1, 1, 0, 0, 0)
+end_date = datetime(2018, 12, 31, 23, 59, 59)
+entity_list = pd.read_csv("data/entity_list.csv", header=0)["entity"]
+df = conventional_scrape(entity_list, start_date, end_date)
+df["label"] = 0
+df.to_csv("data/conventional_negative_unfiltered_2018.csv")
+###################################################

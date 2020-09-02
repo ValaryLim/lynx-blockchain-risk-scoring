@@ -47,10 +47,11 @@ def theguardian_scrape(entity, start_date, end_date):
         # retrieve excerpt
         excerpt = result["fields"]["bodyText"]
 
-        # add information to dataframe
-        df = df.append({"date_time": date_time, "title": title_text, \
-                "excerpt": excerpt, "article_url": article_url
-            }, ignore_index=True)
+        # add information to dataframe when entity is in text (self-filter)
+        if entity in title_text or entity in excerpt:
+            df = df.append({"date_time": date_time, "title": title_text, \
+                    "excerpt": excerpt, "article_url": article_url
+                }, ignore_index=True)
     
     return df
 

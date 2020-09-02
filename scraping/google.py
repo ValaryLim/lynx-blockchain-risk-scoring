@@ -11,25 +11,45 @@ def google_scrape(entity, start_date, end_date):
     Scrap (using GoogleNews API) the top 10 headlines of google news on a particular entity, for a given time range
     Output : Pandas Dataframe with title, short summary, date & url column
     '''
-    news = GoogleNews(start=start_date.strftime("%m/%d/%Y"),end=end_date.strftime("%m/%d/%Y"), lang='en', encode='utf-8')
-    news.search(f"{entity}")   # Main bulk of time, taking ~2 seconds to search
+    # calculate the number of weeks between start and end date (inclusive)
+    n_periods = (end_date - start_date).days // 7 + 2
     
-    if pd.DataFrame(news.result()).empty:
-        # No relevant articles 
-        return pd.DataFrame(columns=['date_time', 'title', 'excerpt', 'article_url'])
-    
-    df = pd.DataFrame(news.result())[['date', 'title', 'desc', 'media', 'link']]
-    # Rename columns
-    df.columns = ['date_time', 'title', 'excerpt', 'domain', 'article_url']
-    
-    # Only get headlines which mention the entity of interest
-    df=df[df['title'].str.contains(entity,flags=re.IGNORECASE)].reset_index(drop=True)
-    df['date_time'] = df.date_time.apply(date_convert)
+    # divide the dates into date_periods (query top 10 for each week)
+    date_range = pd.date_range(start_date, end_date, periods=n_periods)
 
-    # remove rows without datetime
-    df = df.dropna(axis=0, subset=["date_time"])
+    # create result df with columns
+    result_df = pd.DataFrame(columns=['date_time', 'title', 'excerpt', 'domain', 'article_url'])
+
+    # go through the date ranges and retrieve top 10
+    for i in range(len(date_range)-1):
+        start_temp = date_range[i]
+        end_temp = date_range[i+1]
+
+        news = GoogleNews(start=start_temp.strftime("%m/%d/%Y"),end=end_temp.strftime("%m/%d/%Y"), lang='en', encode='utf-8')
+        news.search(f"{entity}")   # Main bulk of time, taking ~2 seconds to search
     
-    return df
+        if pd.DataFrame(news.result()).empty:
+            print("this is the case")
+            # No relevant articles 
+            continue
+    
+        # retrieve relevant news results
+        temp_df = pd.DataFrame(news.result())[['date', 'title', 'desc', 'media', 'link']]
+        
+        # rename columns
+        temp_df.columns = ['date_time', 'title', 'excerpt', 'domain', 'article_url']
+        
+        # only get headlines which mention the entity of interest
+        temp_df = temp_df[temp_df['title'].str.contains(entity,flags=re.IGNORECASE)].reset_index(drop=True)
+        temp_df['date_time'] = temp_df.date_time.apply(date_convert)
+
+        # remove rows without datetime
+        temp_df = temp_df.dropna(axis=0, subset=["date_time"])
+
+        # combine result df
+        result_df = pd.concat([result_df, temp_df])
+    
+    return result_df
 
 
 def date_convert(day): 
@@ -47,8 +67,10 @@ def date_convert(day):
         except:
             return None
 
-# start_date = datetime(2018, 5, 22, 0, 0, 0)
-# end_date = datetime(2018, 5, 23, 23, 59, 59)
-# test = google_scrape("Ethereum", start_date, end_date)
-# print(test)
+# test case
+# start_date = datetime(2018, 1, 1, 0, 0, 0)
+# end_date = datetime(2018, 3, 20, 23, 59, 59)
+# entity = "ethereum"
+# df = google_scrape(entity, start_date, end_date)
+# print(df)
 
