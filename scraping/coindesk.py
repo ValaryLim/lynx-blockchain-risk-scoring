@@ -74,13 +74,13 @@ def coindesk_scrape(entity, start_date, end_date):
         excerpt = article_module.find(class_="card-text").text.strip()
 
         # add information to dataframe
-        df = df.append({"date_time": date_time, "title": title_text, "excerpt": excerpt,             "category": category, "article_url": article_url}, ignore_index=True)
+        df = df.append({"date_time": date_time, "title": title_text, "excerpt": excerpt, "article_url": article_url, "category": category}, ignore_index=True)
 
     driver.quit()
     return df
 
 
-# # testing function
+# testing function
 # start_date = datetime(2020, 8, 27)
 # end_date = datetime(2020, 8, 28)
 # test = coindesk_scrape("bitcoin", start_date, end_date)
