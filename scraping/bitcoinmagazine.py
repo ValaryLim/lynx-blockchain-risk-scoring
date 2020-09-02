@@ -13,7 +13,7 @@ def bitcoinmagazine_scrape(entity, start_date, end_date):
     page = urlopen(req)
     soup = BeautifulSoup(page, 'lxml')
 
-    data = {'date_time':[], 'title':[], 'description':[], 'article_url':[], 'image_url':[], 'author':[], 'author_url':[]}
+    data = {'date_time':[], 'title':[], 'excerpt':[], 'article_url':[], 'image_url':[], 'author':[], 'author_url':[]}
 
     max_page = 1
     res = soup.find('div',class_ = 'nav-links')
@@ -49,7 +49,7 @@ def bitcoinmagazine_scrape(entity, start_date, end_date):
                     data['article_url'].append(article_url)
 
                     description = res.p.text.lower()
-                    data['description'].append(description)
+                    data['excerpt'].append(description)
 
                     author_a = res.find('aside',class_ = 'thb-post-bottom').a
                     author = author_a.text.lower()
@@ -67,16 +67,11 @@ def bitcoinmagazine_scrape(entity, start_date, end_date):
     df = pd.DataFrame(data)
     return df
 
-
-
-
 ################ Test ##################
-##entity = 'binance'
-##start_date = datetime(2020,1,1)
-##end_date = datetime(2020,9,1)
-##df = bitcoinmagazine_scrape(entity, start_date, end_date)
+## entity = 'binance'
+## start_date = datetime(2020,1,1)
+## end_date = datetime(2020,9,1)
+## df = bitcoinmagazine_scrape(entity, start_date, end_date)
+## print(df)
 #########################################
 ##df.to_csv(r'file.csv')
-
-
-
