@@ -1,3 +1,6 @@
+# NOTE - Articles are not sorted by recency
+#        Have to scrape all articles then filter by date.
+
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -23,7 +26,7 @@ def blockonomi_scrape(entity, start_date, end_date):
 
         for i in range(len(results)): 
             # retrieve date 
-            date_string = results[0].find("time", class_="post-date")["datetime"][:-6]
+            date_string = results[i].find("time", class_="post-date")["datetime"][:-6]
             date_time = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S")
             current_date = date_time # update current date 
   
@@ -60,7 +63,7 @@ def blockonomi_scrape(entity, start_date, end_date):
     return df
 
 # entity = "ethereum"
-# start_date = datetime(2019, 9, 17)
-# end_date = datetime(2020, 8, 17)
+# start_date = datetime(2019, 9, 17)
+# end_date = datetime(2020, 9, 1)
 # df = blockonomi_scrape(entity, start_date, end_date)
 # print(df)
