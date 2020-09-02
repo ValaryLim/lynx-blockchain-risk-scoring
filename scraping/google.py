@@ -6,7 +6,6 @@ from dateutil.relativedelta import *
 
 
 def google_scrape(entity, start_date, end_date):
-    
     '''
     Scrap (using GoogleNews API) the top 10 headlines of google news on a particular entity, weekly, over a given time range
     Output : Pandas Dataframe with datetime, title, excerpt, domain (news origin), and article url
@@ -29,7 +28,6 @@ def google_scrape(entity, start_date, end_date):
         news.search(f"{entity}")   # Main bulk of time, taking ~2 seconds to search
     
         if pd.DataFrame(news.result()).empty:
-            print("this is the case")
             # No relevant articles 
             continue
     

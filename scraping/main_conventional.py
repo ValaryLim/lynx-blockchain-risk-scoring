@@ -90,9 +90,30 @@ def retrieve_cases(file, time_frame=7):
 
 #### UNCOMMENT TO RETRIEVE NEGATIVE TEST CASES ####
 start_date = datetime(2018, 1, 1, 0, 0, 0)
+end_date = datetime(2018, 6, 30, 23, 59, 59)
+entity_list = pd.read_csv("data/entity_list.csv", header=0)["entity"]
+df = conventional_scrape(entity_list, start_date, end_date)
+df["label"] = 0
+df.to_csv("data/conventional_negative_unfiltered_2018_1.csv")
+
+start_date = datetime(2018, 7, 1, 0, 0, 0)
 end_date = datetime(2018, 12, 31, 23, 59, 59)
 entity_list = pd.read_csv("data/entity_list.csv", header=0)["entity"]
 df = conventional_scrape(entity_list, start_date, end_date)
 df["label"] = 0
-df.to_csv("data/conventional_negative_unfiltered_2018.csv")
+df.to_csv("data/conventional_negative_unfiltered_2018_2.csv")
+
+start_date = datetime(2019, 1, 1, 0, 0, 0)
+end_date = datetime(2019, 6, 30, 23, 59, 59)
+entity_list = pd.read_csv("data/entity_list.csv", header=0)["entity"]
+df = conventional_scrape(entity_list, start_date, end_date)
+df["label"] = 0
+df.to_csv("data/conventional_negative_unfiltered_2019_1.csv")
+
+start_date = datetime(2019, 7, 1, 0, 0, 0)
+end_date = datetime(2019, 12, 31, 23, 59, 59)
+entity_list = pd.read_csv("data/entity_list.csv", header=0)["entity"]
+df = conventional_scrape(entity_list, start_date, end_date)
+df["label"] = 0
+df.to_csv("data/conventional_negative_unfiltered_2019_2.csv")
 ###################################################
