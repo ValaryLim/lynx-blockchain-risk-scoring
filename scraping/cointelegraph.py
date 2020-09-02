@@ -58,7 +58,7 @@ def cointelegraph_scrape(entity, start_date, end_date):
 
         current_date = date_time    
         
-    column_names = ["date_time", "title", "excerpt", "category", "article_url"]
+    column_names = ["date_time", "title", "excerpt", "article_url", "category"]
     df = pd.DataFrame(columns = column_names)
 
     # retrieve details from all articles
@@ -87,16 +87,16 @@ def cointelegraph_scrape(entity, start_date, end_date):
         category = soup.find(class_="image").find("p").text
 
         # add information to dataframe
-        df = df.append({"date_time": date_time, "title": title_text, "excerpt": excerpt,             "category": category, "article_url": article_url}, ignore_index=True)
+        df = df.append({"date_time": date_time, "title": title_text, "excerpt": excerpt, "article_url": article_url, "category": category}, ignore_index=True)
 
     driver.quit()
     return df
 
 
 ## testing function
-#start_date = datetime(2020, 8, 20)
-#end_date = datetime(2020, 8, 28)
-#test = cointelegraph_scrape("bitcoin", start_date, end_date)
+# start_date = datetime(2020, 8, 20)
+# end_date = datetime(2020, 8, 28)
+# test = cointelegraph_scrape("bitcoin", start_date, end_date)
 
 
 

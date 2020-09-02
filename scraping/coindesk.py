@@ -52,7 +52,7 @@ def coindesk_scrape(entity, start_date, end_date):
 
         current_date = date_time    
         
-    column_names = ["date_time", "title", "excerpt", "category", "article_url"]
+    column_names = ["date_time", "title", "excerpt", "article_url",  "category"]
     df = pd.DataFrame(columns = column_names)
 
     # retrieve details from all articles
