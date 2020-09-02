@@ -76,7 +76,7 @@ def cryptonews_scrape(entity, start_date, end_date):
     driver.quit()
     return df
 
-entity = "ethereum"
+entity = "Forsage.io"
 start_date = datetime(2020, 7, 17)
 end_date = datetime(2020, 8, 10)
 df = cryptonews_scrape(entity, start_date, end_date)
