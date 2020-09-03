@@ -5,14 +5,15 @@ import regex as re
 from dateutil.relativedelta import *
 
 
-def google_scrape(entity, start_date, end_date):
+
+def google_scrape(entity, start_date, end_date, days_per_period=7):
     '''
     Scrap (using GoogleNews API) the top 10 headlines of google news on a particular entity, weekly, over a given time range
     Output : Pandas Dataframe with datetime, title, excerpt, domain (news origin), and article url
     '''
     # calculate the number of weeks between start and end date (inclusive)
-    n_periods = (end_date - start_date).days // 7 + 2
-    
+    n_periods = (end_date - start_date).days // days_per_period + 2
+
     # divide the dates into date_periods (query top 10 for each week)
     date_range = pd.date_range(start_date, end_date, periods=n_periods)
 
@@ -47,11 +48,7 @@ def google_scrape(entity, start_date, end_date):
         # combine result df
         result_df = pd.concat([result_df, temp_df])
 
-        # clear news before moving to next query
-        news.clear()
-    
     return result_df
-
 
 def date_convert(day): 
     if day == '1 month ago':
@@ -70,8 +67,8 @@ def date_convert(day):
 
 # test case
 # start_date = datetime(2018, 1, 1, 0, 0, 0)
-# end_date = datetime(2018, 3, 20, 23, 59, 59)
-# entity = "ethereum"
+# end_date = datetime(2019, 12, 20, 23, 59, 59)
+# entity = "ZB.com"
 # df = google_scrape(entity, start_date, end_date)
 # print(df)
 

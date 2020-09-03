@@ -83,37 +83,47 @@ def retrieve_cases(file, time_frame=7):
 
     return result_df
 
+def combine_samples(positive=[], negative=[]):
+    # read and combine negative datasets first
+    for i in range(len(negative)):
+        if i == 0:
+            result_df = pd.read_csv(negative[0], header=0)
+        else:
+            temp_df = pd.read_csv(negative[i], header=0)
+            result_df = pd.concat([result_df, temp_df])
+            
+    # read and combine positive datasets
+    for i in range(len(positive)):
+        if (len(negative) == 0 and i == 0):
+            result_df = pd.read_csv(positive[0], header=0)
+        else:
+            temp_df = pd.read_csv(positive[i], header=0)
+            result_df = pd.concat([result_df, temp_df])
+    
+    # remove duplicates in results
+    result_df.drop_duplicates(subset=["title", "excerpt"], keep="last")
+
+    # additional cleaning
+    result_df = result_df.dropna(how="all")
+    result_df = result_df.fillna('')
+
+    return result_df
+
 #### UNCOMMENT TO RETRIEVE POSITIVE TEST CASES ####
 # df = retrieve_cases("data/hacks_list.csv", time_frame=7)
 # df.to_csv("data/conventional_positive_unfiltered.csv")
 ###################################################
 
 #### UNCOMMENT TO RETRIEVE NEGATIVE TEST CASES ####
-start_date = datetime(2018, 1, 1, 0, 0, 0)
-end_date = datetime(2018, 6, 30, 23, 59, 59)
-entity_list = pd.read_csv("data/entity_list.csv", header=0)["entity"]
-df = conventional_scrape(entity_list, start_date, end_date)
-df["label"] = 0
-df.to_csv("data/conventional_negative_unfiltered_2018_1.csv")
-
-start_date = datetime(2018, 7, 1, 0, 0, 0)
-end_date = datetime(2018, 12, 31, 23, 59, 59)
-entity_list = pd.read_csv("data/entity_list.csv", header=0)["entity"]
-df = conventional_scrape(entity_list, start_date, end_date)
-df["label"] = 0
-df.to_csv("data/conventional_negative_unfiltered_2018_2.csv")
-
-start_date = datetime(2019, 1, 1, 0, 0, 0)
-end_date = datetime(2019, 6, 30, 23, 59, 59)
-entity_list = pd.read_csv("data/entity_list.csv", header=0)["entity"]
-df = conventional_scrape(entity_list, start_date, end_date)
-df["label"] = 0
-df.to_csv("data/conventional_negative_unfiltered_2019_1.csv")
-
-start_date = datetime(2019, 7, 1, 0, 0, 0)
-end_date = datetime(2019, 12, 31, 23, 59, 59)
-entity_list = pd.read_csv("data/entity_list.csv", header=0)["entity"]
-df = conventional_scrape(entity_list, start_date, end_date)
-df["label"] = 0
-df.to_csv("data/conventional_negative_unfiltered_2019_2.csv")
+# start_date = datetime(2018, 1, 1, 0, 0, 0)
+# end_date = datetime(2019, 12, 31, 23, 59, 59)
+# entity_list = pd.read_csv("data/entity_list.csv", header=0)["entity"]
+# df = conventional_scrape(entity_list, start_date, end_date)
+# df["label"] = 0
+# df.to_csv("data/conventional_negative_unfiltered.csv")
 ###################################################
+
+#### UNCOMMENT TO COMBINE SAMPLES ####
+# df = combine_samples(positive=["data/conventional_positive.csv"], negative=["data/conventional_negative_unfiltered.csv"])
+# df.to_csv("data/conventional_sample.csv")
+######################################
