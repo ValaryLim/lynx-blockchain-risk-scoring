@@ -20,6 +20,10 @@ def bitnewstoday_scrape(entity, start_date, end_date):
         # retrieve only search items
         results = soup.find_all(class_="search-item")
 
+        # no search results
+        if len(results) == 0:
+            break
+
         for i in range(len(results)): 
             # retrieve date 
             date_string = results[i].find("span").text

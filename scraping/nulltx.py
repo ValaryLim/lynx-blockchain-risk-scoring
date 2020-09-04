@@ -22,6 +22,9 @@ def nulltx_scrape(entity, start_date, end_date):
         # retrieve only search items
         results = main_content.find_all(class_="td_module_16")
 
+        if len(results) == 0:
+            break
+
         for i in range(len(results)): 
             # retrieve date 
             date_string = results[i].find("time", class_="entry-date")["datetime"][:-6]

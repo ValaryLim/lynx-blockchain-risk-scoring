@@ -21,6 +21,9 @@ def insidebitcoins_scrape(entity, start_date, end_date):
         # retrieve only search items
         results = soup.find_all("article") 
 
+        if len(results) == 0:
+            break
+
         for i in range(len(results)): 
             # retrieve date 
             date_string = results[i].find(class_="c-ArticleInfo--date").find("span").text
