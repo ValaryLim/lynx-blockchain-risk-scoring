@@ -5,7 +5,7 @@ import regex as re
 from dateutil.relativedelta import *
 
 
-def google_scrap(entity, start_date, end_date):
+def google_scrape(entity, start_date, end_date):
     
     '''
     Scrap (using GoogleNews API) the top 10 headlines of google news on a particular entity, for a given time range
@@ -18,16 +18,13 @@ def google_scrap(entity, start_date, end_date):
         # No relevant articles 
         return pd.DataFrame(columns=['date_time', 'title', 'excerpt', 'article_url'])
     
-    df = pd.DataFrame(news.result())[['title', 'desc', 'date', 'link']]
+    df = pd.DataFrame(news.result())[['date', 'title', 'desc', 'media', 'link']]
     # Rename columns
-    df.columns = ['title', 'excerpt', 'date_time', 'article_url']
+    df.columns = ['date_time', 'title', 'excerpt', 'domain', 'article_url']
     
     # Only get headlines which mention the entity of interest
     df=df[df['title'].str.contains(entity,flags=re.IGNORECASE)].reset_index(drop=True)
     df['date_time'] = df.date_time.apply(date_convert)
-    
-    # Reorder columns
-    df=df[['date_time', 'title', 'excerpt', 'article_url']]
     
     return df
 
@@ -46,11 +43,5 @@ def date_convert(day):
 
 # start_date = datetime(2020, 7, 27)
 # end_date = datetime(2020, 9, 1)
-# test = google_scrap("Binance", start_date, end_date)
+# test = google_scrape("Binance", start_date, end_date)
 # print(test)
-
-
-
-
-
-
