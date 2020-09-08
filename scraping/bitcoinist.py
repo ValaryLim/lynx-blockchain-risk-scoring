@@ -4,6 +4,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from bs4 import BeautifulSoup
 from datetime import datetime
 import pandas as pd
+import numpy as np
 import requests
 import time
 
@@ -16,8 +17,10 @@ def bitcoinist_scrape(entity, start_date, end_date):
     # create driver
     driver = webdriver.Chrome('./utils/chromedriver')
 
+    entity_name = entity.replace(" ", "+")
+
     # search for webpage
-    url = "https://bitcoinist.com/?s={}&lang=en".format(entity)
+    url = "https://bitcoinist.com/?s={}&lang=en".format(entity_name)
     driver.get(url)
 
     driver.implicitly_wait(10)
@@ -103,7 +106,10 @@ def bitcoinist_scrape(entity, start_date, end_date):
             category = article_details.find('a', class_='category').get_text()
 
             # retrieve image url
-            image_url = soup.find('img')['src']
+            try:
+                image_url = soup.find('img')['src']
+            except:
+                image_url = np.nan
 
             # add information to dataframe
             df = df.append({"title": title, "excerpt": excerpt, "article_url": article_url, \

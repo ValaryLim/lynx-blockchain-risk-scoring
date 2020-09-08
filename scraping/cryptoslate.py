@@ -4,6 +4,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from bs4 import BeautifulSoup
 from datetime import datetime
 import pandas as pd
+import numpy as np
 import requests
 import time
 
@@ -11,8 +12,10 @@ def cryptoslate_scrape(entity, start_date, end_date):
     # create driver
     driver = webdriver.Chrome('./utils/chromedriver')
 
+    entity_name = entity.replace(" ", "+")
+
     # search for webpage
-    url = "https://cryptoslate.com/?s={}".format(entity)
+    url = "https://cryptoslate.com/?s={}".format(entity_name)
     driver.get(url)
 
     # preliminary search of all articles
@@ -40,11 +43,17 @@ def cryptoslate_scrape(entity, start_date, end_date):
         # keep pressing load more button until reach start date
         current_date = date_time
         while current_date >= start_date:
-            # refind load button and press
-            load_more_button = driver.find_element_by_xpath("//a[@class='load-more news-load-more-ajax']")
-            action = ActionChains(driver)
-            action.move_to_element(load_more_button).click(load_more_button).perform()
-            time.sleep(3)
+            try:
+                # refind load button and press
+                load_more_button = driver.find_element_by_xpath("//a[@class='load-more news-load-more-ajax']")
+                action = ActionChains(driver)
+                action.move_to_element(load_more_button).click(load_more_button).perform()
+                time.sleep(3)
+            except:
+                # no load button to press
+                # reached end of articles
+                pass
+                break
 
             # retrieve articles again
             articles = driver.find_elements_by_xpath("//div[@class='list-post-excerpt clearfix ']")
@@ -97,10 +106,15 @@ def cryptoslate_scrape(entity, start_date, end_date):
             html = requests.get(article_url)
             html_content = html.content
             soup = BeautifulSoup(html_content)
-            full_date = soup.find_all('span', class_='post-date')[0].get_text()
-            date_string = full_date.split("at", 1)[0]
-            date_time = datetime.strptime(date_string, "%B %d, %Y ")
-            datetime_lst.append(date_time)
+            try:
+                full_date = soup.find_all('span', class_='post-date')[0].get_text()
+                date_string = full_date.split("at", 1)[0]
+                date_time = datetime.strptime(date_string, "%B %d, %Y ")
+                datetime_lst.append(date_time)
+            except:
+                # if no date, append None
+                datetime_lst.append(np.nan)
+                continue
         
         # add date_time column to df
         df['date_time'] = datetime_lst

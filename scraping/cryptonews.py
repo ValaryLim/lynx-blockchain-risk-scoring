@@ -15,8 +15,10 @@ def cryptonews_scrape(entity, start_date, end_date):
     # create driver
     driver = webdriver.Chrome('./utils/chromedriver', options=chrome_options)
 
+    entity_name = entity.replace(" ", "+")
+
     # search for webpage
-    search = "https://cryptonews.com/search/articles.htm?q=" + entity
+    search = "https://cryptonews.com/search/articles.htm?q=" + entity_name
     driver.get(search)
 
     # preliminary search of all articles
@@ -36,12 +38,17 @@ def cryptonews_scrape(entity, start_date, end_date):
         # keep pressing load more button until reach start date
         current_date = date_time
         while current_date >= start_date:
-            # refind load button and press
-            load_more_section = driver.find_element_by_xpath("//div[@class='cn-section-controls']")
-            load_more_button = load_more_section.find_element_by_tag_name("a")
-            action = ActionChains(driver)
-            action.move_to_element(load_more_button).click(load_more_button).perform()
-            time.sleep(3)
+            try:
+                # refind load button and press
+                load_more_section = driver.find_element_by_xpath("//div[@class='cn-section-controls']")
+                load_more_button = load_more_section.find_element_by_tag_name("a")
+                action = ActionChains(driver)
+                action.move_to_element(load_more_button).click(load_more_button).perform()
+                time.sleep(3)
+            except:
+                # no more load more button
+                pass
+                break
 
             # retrieve articles again
             articles = driver.find_elements_by_xpath("//div[@class='cn-tile article']")

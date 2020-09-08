@@ -63,7 +63,7 @@ def bitcoinmagazine_scrape(entity, start_date, end_date):
             except:
                 continue
 
-
+    print(data)
     df = pd.DataFrame(data)
     return df
 

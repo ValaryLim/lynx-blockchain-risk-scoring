@@ -9,12 +9,14 @@ def insidebitcoins_scrape(entity, start_date, end_date):
     page_num = 1
     current_date = end_date
 
+    entity_search = entity.replace(" ", "+")
+
     column_names = ["date_time", "title", "excerpt", "article_url", "image_url"]
     df = pd.DataFrame(columns = column_names)
 
     while current_date >= start_date: 
         # new page of queries
-        search = website_url + f"/page/{page_num}?s={entity}&submit=Search" #f string might be easier for formatting
+        search = website_url + f"/page/{page_num}?s={entity_search}&submit=Search" #f string might be easier for formatting
         page = requests.get(search)
         soup = BeautifulSoup(page.content, features="html.parser")
 
@@ -25,9 +27,14 @@ def insidebitcoins_scrape(entity, start_date, end_date):
             break
 
         for i in range(len(results)): 
-            # retrieve date 
-            date_string = results[i].find(class_="c-ArticleInfo--date").find("span").text
-            print(date_string)
+            try: 
+                # retrieve date 
+                date_string = results[i].find(class_="c-ArticleInfo--date").find("span").text
+                # print(date_string)
+            except:
+                pass
+                continue
+
             date_time = datetime.strptime(date_string, "%d %B %Y ") 
             current_date = date_time # update current date 
   

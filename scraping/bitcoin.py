@@ -32,8 +32,12 @@ def bitcoin_scrape(entity, start_date, end_date):
             title = news[i].find('a')['title']
             article_url = news[i].find('a')['href']
             image_url = news[i].find('img')['src']
-            category = news_details[i].find('a').get_text()
             excerpt = news_excerpt[i].get_text()
+            try: 
+                category = news_details[i].find('a').get_text()
+            except:
+                category = ''
+                pass
 
             # check whether datetime is wihin range
             if (date_time <= end_date) and (date_time >= start_date):
@@ -45,6 +49,10 @@ def bitcoin_scrape(entity, start_date, end_date):
             # terminating conditions
             if (date_time < start_date):
                 continue_search = False
+        
+        # break loop if no search results
+        if len(news) == 0:
+            break
         
         # increment page number
         page_number += 1

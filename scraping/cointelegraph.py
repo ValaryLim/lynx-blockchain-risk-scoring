@@ -45,14 +45,18 @@ def cointelegraph_scrape(entity, start_date, end_date):
         # keep pressing load more button until reach start date
         current_date = date_time
         while current_date >= start_date:
-            # refind load button and press
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-            time.sleep(2)
-            load_more_section = driver.find_element_by_xpath("//div[@class='col-xs-12 load']")
-            load_more_button = load_more_section.find_element_by_tag_name("a")
-            action = ActionChains(driver)
-            action.move_to_element(load_more_button).click(load_more_button).perform()
-            time.sleep(3)
+            try:
+                # refind load button and press
+                # driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+                # time.sleep(2)
+                load_more_section = driver.find_element_by_xpath("//div[@class='col-xs-12 load']")
+                load_more_button = load_more_section.find_element_by_tag_name("a")
+                action = ActionChains(driver)
+                action.move_to_element(load_more_button).click(load_more_button).perform()
+                time.sleep(10)
+            except:
+                # no more load button
+                break
 
             # retrieve articles again
             articles = driver.find_elements_by_xpath("//div[@class='row result']")
@@ -80,6 +84,9 @@ def cointelegraph_scrape(entity, start_date, end_date):
 
             if date_time > end_date:
                 continue
+
+            if date_time < start_date:
+                break
 
             # retrieve url and text 
             article_module = soup.find(class_="header").find("a")

@@ -10,6 +10,11 @@ def bitnewstoday_scrape(entity, start_date, end_date):
 
     column_names = ["date_time", "title", "excerpt", "article_url", "image_url"]
     df = pd.DataFrame(columns = column_names)
+    
+    # add + for entity with spaces
+    entity = entity.replace(" ", "+")
+
+    prev_results = ''
 
     while current_date >= start_date: 
         # new page of queries
@@ -19,14 +24,22 @@ def bitnewstoday_scrape(entity, start_date, end_date):
 
         # retrieve only search items
         results = soup.find_all(class_="search-item")
-
+        
         # no search results
         if len(results) == 0:
             break
 
-        for i in range(len(results)): 
-            # retrieve date 
-            date_string = results[i].find("span").text
+        # if next page is the same as this page
+        if prev_results == results:
+            break
+
+        for i in range(len(results)):
+            try: 
+                # retrieve date 
+                date_string = results[i].find("span").text
+            except:
+                continue
+
             date_time = datetime.strptime(date_string, "%d.%m.%y")
             current_date = date_time # update current date 
   
@@ -53,6 +66,7 @@ def bitnewstoday_scrape(entity, start_date, end_date):
                     "image_url": image_url
                 }, ignore_index=True)
 
+        prev_results = results
         page_num += 1 # scrape next page
         
     return df
