@@ -11,7 +11,7 @@ def filter_out(sentence):
         'update', 'winner', 'history', 'competition', 'review', 'welcome', 'bull', 'bear', \
         'perform', 'cost', 'discount', 'spend', 'perform', 'potential', 'interest', 'success',\
         'prediction', 'forecast', 'top', 'return', 'gift', 'demand', 'trend', 'shop', 'buy',\
-        'brief', 'tip', 'complete', 'expand', 'improve', 'retail', 'explain'}
+        'brief', 'tip', 'complete', 'expand', 'improve', 'retail', 'explain', 'investment'}
 
     # pre-process sentence
     processed_sentence = pre_processing(sentence)

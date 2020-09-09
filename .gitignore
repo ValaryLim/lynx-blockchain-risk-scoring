@@ -1,5 +1,5 @@
 .DS_Store
 
 scraping/data
-scraping/utils
+scraping/utils/chromedriver
 scraping/__pycache__
