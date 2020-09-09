@@ -77,7 +77,7 @@ def cryptonews_scrape(entity, start_date, end_date):
             title_text = article_module.text
 
             # retrieve category
-            category = soup.find("h4").find("a").text
+            category = soup.find("span", class_='notch').find("a").text
 
             # add information to dataframe
             df = df.append({"date_time": date_time, "title": title_text, \
