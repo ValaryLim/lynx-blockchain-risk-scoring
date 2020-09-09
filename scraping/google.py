@@ -71,4 +71,3 @@ def date_convert(day):
 # entity = "ZB.com"
 # df = google_scrape(entity, start_date, end_date)
 # print(df)
-
