@@ -1,9 +1,11 @@
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from google import google_scrape
 from theguardian import theguardian_scrape
 from cryptocontrol import cryptocontrol_scrape
+
+from data_filter import filter_out
 
 def conventional_scrape_by_entity(entity, start_date, end_date):
     column_names = ["date_time", "title", "excerpt", "domain", \
@@ -34,6 +36,9 @@ def conventional_scrape_by_entity(entity, start_date, end_date):
     else: 
         combined_df = pd.concat([google_df, theguardian_df])
     
+    # filter out irrelevant data
+    combined_df = combined_df[combined_df.apply(lambda x: filter_out(x["title"]) and filter_out(x["excerpt"]), axis=1)]
+    
     return combined_df
 
 def conventional_scrape(entity_list, start_date, end_date):
@@ -49,11 +54,86 @@ def conventional_scrape(entity_list, start_date, end_date):
     # drop columns where all rows are nan
     result_df = result_df.dropna(axis=1, how='all')
 
+    # remove duplicates of title, excerpt
+    result_df.drop_duplicates(subset =["title", "excerpt", "entity"], keep = False, inplace = True) 
+
     return result_df
 
-# entity = "ethereum"
-# start_date = datetime(2019, 8, 1, 0, 0, 0)
-# end_date = datetime(2020, 9, 2, 23, 59, 59)
-# entity_list = ["binance", "ethereum", "upbit"]
-# print(conventional_scrape_by_entity(entity="ethereum", start_date=start_date, end_date=end_date))
-# print(conventional_scrape(entity_list=entity_list, start_date=start_date, end_date=end_date))
+def retrieve_cases(file, time_frame=7):
+    hacks_list = pd.read_csv(file, header=0)
+    hacks_list = hacks_list.dropna(how="all")
+    hacks_list = hacks_list.fillna('')
+
+    for index, hack in hacks_list.iterrows():
+        start_date =  datetime.strptime(hack["start_date"], '%Y-%m-%d')
+        end_date = start_date + timedelta(days=time_frame)
+        entity1 = hack["exchange"]
+        entity2 = hack["coin"]
+
+        if entity1 and entity2: 
+            temp_df = conventional_scrape([entity1, entity2], start_date, end_date)
+        elif entity1: 
+            temp_df = conventional_scrape_by_entity(entity1, start_date, end_date)
+        else: 
+            temp_df = conventional_scrape_by_entity(entity2, start_date, end_date)
+        
+        if index == 0: 
+            result_df = temp_df
+        else: 
+            result_df = pd.concat([result_df, temp_df])
+    
+    # remove duplicates of title, excerpt
+    result_df.drop_duplicates(subset =["title", "excerpt", "entity"], keep = False, inplace = True) 
+
+    return result_df
+
+def combine_samples(positive=[], negative=[]):
+    # read and combine negative datasets first
+    for i in range(len(negative)):
+        if i == 0:
+            result_df = pd.read_csv(negative[0], header=0)
+        else:
+            temp_df = pd.read_csv(negative[i], header=0)
+            result_df = pd.concat([result_df, temp_df])
+            
+    # read and combine positive datasets
+    for i in range(len(positive)):
+        if (len(negative) == 0 and i == 0):
+            result_df = pd.read_csv(positive[0], header=0)
+        else:
+            temp_df = pd.read_csv(positive[i], header=0)
+            result_df = pd.concat([result_df, temp_df])
+    
+    # remove duplicates in results
+    result_df.drop_duplicates(subset=["title", "excerpt", "entity"], keep="last")
+
+    # additional cleaning
+    result_df = result_df.dropna(how="all")
+    result_df = result_df.fillna('')
+
+    return result_df
+
+
+# entity = "upbit"
+# start_date = datetime(2019, 12, 1, 0, 0, 0)
+# end_date = datetime(2019, 12, 31, 23, 59, 59)
+# print(conventional_scrape_by_entity(entity, start_date, end_date))
+
+#### UNCOMMENT TO RETRIEVE POSITIVE TEST CASES ####
+# df = retrieve_cases("data/hacks_list.csv", time_frame=7)
+# df.to_csv("data/conventional_positive_unfiltered.csv")
+###################################################
+
+#### UNCOMMENT TO RETRIEVE NEGATIVE TEST CASES ####
+# start_date = datetime(2018, 1, 1, 0, 0, 0)
+# end_date = datetime(2019, 12, 31, 23, 59, 59)
+# entity_list = pd.read_csv("data/entity_list.csv", header=0)["entity"]
+# df = conventional_scrape(entity_list, start_date, end_date)
+# df["label"] = 0
+# df.to_csv("data/conventional_negative_unfiltered.csv")
+###################################################
+
+#### UNCOMMENT TO COMBINE SAMPLES ####
+# df = combine_samples(positive=["data/conventional_positive.csv"], negative=["data/conventional_negative_unfiltered.csv"])
+# df.to_csv("data/conventional_sample.csv")
+######################################
