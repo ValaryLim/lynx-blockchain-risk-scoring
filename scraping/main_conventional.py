@@ -39,7 +39,6 @@ def conventional_scrape_by_entity(entity, start_date, end_date):
 def conventional_scrape(entity_list, start_date, end_date):
     result_df = pd.DataFrame()
     for i in range(len(entity_list)):
-        print(entity_list[i])
         temp_df = conventional_scrape_by_entity(entity=entity_list[i], start_date=start_date, end_date=end_date)
         temp_df["entity"] = entity_list[i]
         if i == 0:
