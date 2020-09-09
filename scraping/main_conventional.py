@@ -5,6 +5,8 @@ from google import google_scrape
 from theguardian import theguardian_scrape
 from cryptocontrol import cryptocontrol_scrape
 
+from data_filter import filter_out
+
 def conventional_scrape_by_entity(entity, start_date, end_date):
     column_names = ["date_time", "title", "excerpt", "domain", \
         "article_url", "image_url", "hotness", "activity_hotness"]
@@ -33,6 +35,9 @@ def conventional_scrape_by_entity(entity, start_date, end_date):
         combined_df = pd.concat([cryptocontrol_df, google_df, theguardian_df])
     else: 
         combined_df = pd.concat([google_df, theguardian_df])
+    
+    # filter out irrelevant data
+    combined_df = combined_df[combined_df.apply(lambda x: filter_out(x["title"]) and filter_out(x["excerpt"]), axis=1)]
     
     return combined_df
 
@@ -107,6 +112,12 @@ def combine_samples(positive=[], negative=[]):
     result_df = result_df.fillna('')
 
     return result_df
+
+
+# entity = "upbit"
+# start_date = datetime(2019, 12, 1, 0, 0, 0)
+# end_date = datetime(2019, 12, 31, 23, 59, 59)
+# print(conventional_scrape_by_entity(entity, start_date, end_date))
 
 #### UNCOMMENT TO RETRIEVE POSITIVE TEST CASES ####
 # df = retrieve_cases("data/hacks_list.csv", time_frame=7)
