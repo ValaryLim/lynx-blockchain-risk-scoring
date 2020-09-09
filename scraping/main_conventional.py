@@ -50,7 +50,7 @@ def conventional_scrape(entity_list, start_date, end_date):
     result_df = result_df.dropna(axis=1, how='all')
 
     # remove duplicates of title, excerpt
-    result_df.drop_duplicates(subset =["title", "excerpt"], keep = False, inplace = True) 
+    result_df.drop_duplicates(subset =["title", "excerpt", "entity"], keep = False, inplace = True) 
 
     return result_df
 
@@ -78,7 +78,7 @@ def retrieve_cases(file, time_frame=7):
             result_df = pd.concat([result_df, temp_df])
     
     # remove duplicates of title, excerpt
-    result_df.drop_duplicates(subset =["title", "excerpt"], keep = False, inplace = True) 
+    result_df.drop_duplicates(subset =["title", "excerpt", "entity"], keep = False, inplace = True) 
 
     return result_df
 
@@ -100,7 +100,7 @@ def combine_samples(positive=[], negative=[]):
             result_df = pd.concat([result_df, temp_df])
     
     # remove duplicates in results
-    result_df.drop_duplicates(subset=["title", "excerpt"], keep="last")
+    result_df.drop_duplicates(subset=["title", "excerpt", "entity"], keep="last")
 
     # additional cleaning
     result_df = result_df.dropna(how="all")
