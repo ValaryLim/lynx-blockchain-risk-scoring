@@ -1,8 +1,13 @@
 .DS_Store
 
-scraping/data
-scraping/utils/chromedriver
+.vscode
+
 scraping/__pycache__
 scraping/api_key.json
+
+scraping/data
+scraping/utils/chromedriver
+scraping/utils/__pycache__
+
 .gitsecret/keys/random_seed
 !*.secret
