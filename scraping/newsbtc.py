@@ -1,3 +1,5 @@
+""" Articles on newsbtc are not sorted by date. """
+
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd

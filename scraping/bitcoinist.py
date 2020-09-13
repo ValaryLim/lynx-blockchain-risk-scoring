@@ -17,13 +17,12 @@ def bitcoinist_scrape(entity, start_date, end_date):
     # create driver
     driver = webdriver.Chrome('./utils/chromedriver')
 
-    entity_name = entity.replace(" ", "+")
-
     # search for webpage
+    entity_name = entity.replace(" ", "+")
     url = "https://bitcoinist.com/?s={}&lang=en".format(entity_name)
     driver.get(url)
 
-    driver.implicitly_wait(10)
+    driver.implicitly_wait(5)
     # press accept cookies
     accept_container = driver.find_element_by_xpath("//div[@class='wordpress-gdpr-popup-actions-buttons']")
     accept_button = accept_container.find_element_by_xpath("//a[@class='wordpress-gdpr-popup-agree']")
@@ -37,6 +36,7 @@ def bitcoinist_scrape(entity, start_date, end_date):
 
     # preliminary search of all articles
     articles = driver.find_elements_by_xpath("//div[@class='news three columns wo-gutter grid-medium  ']")
+    
     # check that there are articles
     if len(articles) > 0:
         # retrieve last article (least recent)
@@ -83,7 +83,6 @@ def bitcoinist_scrape(entity, start_date, end_date):
             current_date = date_time
         
 
-
         # retrieve details from all articles
         for article in articles:
             soup = BeautifulSoup(article.get_attribute("innerHTML"), features="html.parser")
@@ -127,10 +126,13 @@ def bitcoinist_scrape(entity, start_date, end_date):
             html_content = html.content
             soup = BeautifulSoup(html_content)
             article_header = soup.find('div', class_='hero-mobile mobile')
-            article_text = article_header.find('p').get_text()
-            date_string = article_text.split("|")[1].strip()
-            date_time = datetime.strptime(date_string, "%b %d, %Y")
-            datetime_lst.append(date_time)
+            try:
+                article_text = article_header.find('p').get_text()
+                date_string = article_text.split("|")[1].strip()
+                date_time = datetime.strptime(date_string, "%b %d, %Y")
+                datetime_lst.append(date_time)
+            except:
+                datetime_lst.append(np.nan)
 
         # add date_time column to df
         df['date_time'] = datetime_lst

@@ -1,5 +1,4 @@
-# NOTE - Articles are not sorted by recency
-#        Have to scrape all articles then filter by date.
+""" Articles on blockonomi are not sorted by date. """
 
 import requests
 from bs4 import BeautifulSoup
