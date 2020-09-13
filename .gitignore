@@ -3,3 +3,6 @@
 scraping/data
 scraping/utils
 scraping/__pycache__
+scraping/api_key.json
+.gitsecret/keys/random_seed
+!*.secret
