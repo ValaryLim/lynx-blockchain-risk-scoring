@@ -59,7 +59,7 @@ def crypto_scrape_by_entity(entity, start_date, end_date):
         df = df.append(df_website)
         # print("scraping completed: " + website_name)
 
-    df_website = df_website[df_website.apply(lambda x: filter_out(x["title"] and filter_out(x["title"])), axis=1)]
+    df = df[df.apply(lambda x: (filter_out(x["title"]) and (filter_out(x["excerpt"]))), axis=1)]
     df = df.reset_index(drop = True)
 
     return df
