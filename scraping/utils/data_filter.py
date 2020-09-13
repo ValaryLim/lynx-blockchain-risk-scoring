@@ -1,4 +1,5 @@
 import string # for punctuation
+import math
 import nltk
 from nltk.stem import WordNetLemmatizer 
 
@@ -11,7 +12,13 @@ def filter_out(sentence):
         'update', 'winner', 'history', 'competition', 'review', 'welcome', 'bull', 'bear', \
         'perform', 'cost', 'discount', 'spend', 'perform', 'potential', 'interest', 'success',\
         'prediction', 'forecast', 'top', 'return', 'gift', 'demand', 'trend', 'shop', 'buy',\
-        'brief', 'tip', 'complete', 'expand', 'improve', 'retail', 'explain', 'investment'}
+        'brief', 'tip', 'complete', 'expand', 'improve', 'retail', 'explain', 'investment', \
+        'sentiment', 'rewind', 'trader', 'trade', 'innovation', 'joke'}
+
+    # if there exist no sentence (excerpt), return True
+    if type(sentence) != str:
+        if math.isnan(sentence):
+            return True
 
     # pre-process sentence
     processed_sentence = pre_processing(sentence)
