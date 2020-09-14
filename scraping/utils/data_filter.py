@@ -13,7 +13,8 @@ def filter_out(sentence):
         'perform', 'cost', 'discount', 'spend', 'perform', 'potential', 'interest', 'success',\
         'prediction', 'forecast', 'top', 'return', 'gift', 'demand', 'trend', 'shop', 'buy',\
         'brief', 'tip', 'complete', 'expand', 'improve', 'retail', 'explain', 'investment', \
-        'sentiment', 'rewind', 'trader', 'trade', 'innovation', 'joke'}
+        'sentiment', 'rewind', 'trader', 'trade', 'innovation', 'joke', 'tax', 'pros', 'rewind', \
+        'hype', 'how'}
 
     # if there exist no sentence (excerpt), return True
     if type(sentence) != str:
