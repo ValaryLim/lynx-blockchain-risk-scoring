@@ -30,6 +30,30 @@ def filter_out(sentence):
 
     return True
 
+
+
+def filter_in(sentence):
+    '''
+    Output: True if sentence should be kept, False otherwise 
+    '''
+    # set of words to filter out (lemmatized)
+    filter_set = {'unsecure','insecure', 'secure', 'security', 'breach', 'hack', 'compromise',\
+        'steal', 'fraud', 'scam', 'heist', 'attack', 'malware', 'suspicious', 'cryptojacking',\
+        'launder', 'allegation','raid', 'emergency', 'suspect', 'risk', 'chaos', 'assault',\
+        'theft', 'criticism','shutdown', 'down', 'disable', 'regulate', 'phish', 'illegal',\
+        'fake', 'suspend','vulnerable', 'leak', 'fraudster'}
+
+    # pre-process sentence
+    processed_sentence = pre_processing(sentence)
+
+    for word in processed_sentence:
+        if word in filter_set: 
+            return True
+    
+    return False
+
+
+
 def pre_processing(sentence):
     wordnet_lemmatizer = WordNetLemmatizer()
 
