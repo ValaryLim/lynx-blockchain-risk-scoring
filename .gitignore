@@ -1,5 +1,13 @@
 .DS_Store
 
+.vscode
+
+scraping/__pycache__
+scraping/api_key.json
+
 scraping/data
 scraping/utils/chromedriver
-scraping/__pycache__
+scraping/utils/__pycache__
+
+.gitsecret/keys/random_seed
+!*.secret

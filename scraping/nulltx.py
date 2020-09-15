@@ -12,6 +12,8 @@ def nulltx_scrape(entity, start_date, end_date):
         "article_url", "image_url", "author_url"]
     df = pd.DataFrame(columns = column_names)
 
+    prev_results = ''
+
     while current_date >= start_date: 
         # new page of queries
         search = website_url + "/page/" + str(page_num) + "/?s=" + entity
@@ -19,8 +21,14 @@ def nulltx_scrape(entity, start_date, end_date):
         soup = BeautifulSoup(page.content, features="html.parser")
         main_content = soup.find(class_="td-main-content")
 
-        # retrieve only search items
-        results = main_content.find_all(class_="td_module_16")
+        try:
+            # retrieve only search items
+            results = main_content.find_all(class_="td_module_16")
+        except:
+            break
+
+        if len(results) == 0:
+            break
 
         for i in range(len(results)): 
             # retrieve date 

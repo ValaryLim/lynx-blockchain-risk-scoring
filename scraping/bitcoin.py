@@ -18,7 +18,7 @@ def bitcoin_scrape(entity, start_date, end_date):
         html_content = html.content
 
         # locate relevant sections
-        soup = BeautifulSoup(html_content, 'html5lib')
+        soup = BeautifulSoup(html_content, 'html.parser')
         news = soup.find_all('div', class_='td_module_16 td_module_wrap td-animation-stack')
         news_details = soup.find_all('div', class_='td-module-meta-info')
         news_excerpt = soup.find_all('div', class_='td-excerpt')
@@ -27,16 +27,20 @@ def bitcoin_scrape(entity, start_date, end_date):
         for i in range(0, len(news)):
             # retrieve relevant attributes
             # note datetime string is in the format '2020-06-01T14:04:01+00:00'
-            date_time_str = news[i].find('time')['datetime'][0:19]
-            date_time = datetime.strptime(date_time_str, '%Y-%m-%dT%H:%M:%S')
+            date_time_str = news[i].find('time')['datetime'][0:10]
+            date_time = datetime.strptime(date_time_str, '%Y-%m-%d')
             title = news[i].find('a')['title']
             article_url = news[i].find('a')['href']
             image_url = news[i].find('img')['src']
-            category = news_details[i].find('a').get_text()
             excerpt = news_excerpt[i].get_text()
+            try: 
+                category = news_details[i].find('a').get_text()
+            except:
+                category = ''
+                pass
 
             # check whether datetime is wihin range
-            if (date_time < end_date) and (date_time > start_date):
+            if (date_time <= end_date) and (date_time >= start_date):
                 # append row to data frame
                 output = output.append({'date_time': date_time, 'title': title, 'excerpt': excerpt, \
                                         'article_url': article_url, 'image_url': image_url, \
@@ -46,6 +50,10 @@ def bitcoin_scrape(entity, start_date, end_date):
             if (date_time < start_date):
                 continue_search = False
         
+        # break loop if no search results
+        if len(news) == 0:
+            break
+        
         # increment page number
         page_number += 1
     
@@ -53,6 +61,6 @@ def bitcoin_scrape(entity, start_date, end_date):
 
 # testing function
 # start_date = datetime(2020, 8, 20)
-# end_date = datetime(2020, 8, 26)
+# end_date = datetime(2020, 8, 30)
 # test = bitcoin_scrape("bitcoin", start_date, end_date)
 # print(test)
