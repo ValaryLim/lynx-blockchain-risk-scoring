@@ -1,17 +1,18 @@
+""" Articles on newsbtc are not sorted by date. """
+
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
 from datetime import datetime
 
-
 def newsbtc_scrape(entity, start_date, end_date):    
-    #Remove all ' ' characters in url
+    # remove all ' ' characters in url
     entity = entity.replace(' ','+')
     
-    #Storing required data
+    # storing required data
     data = {'date_time':[], 'title':[], 'excerpt':[], 'article_url':[], 'image_url':[], 'author':[], 'author_url':[]}
     
-    #retrieve max page number    
+    # retrieve max page number    
     url = 'https://www.newsbtc.com/page/1/?s='+ entity
     page = requests.get(url).text
     soup = BeautifulSoup(page, 'html.parser')
@@ -22,7 +23,7 @@ def newsbtc_scrape(entity, start_date, end_date):
         for i in res1.find_all('a', class_= 'page_number'):
             max_page = int(i.text)
     
-    #Iterate through all the pages
+    # iterate through all the pages
     for i in range(1,max_page+1): 
         url = 'https://www.newsbtc.com/page/' + str(i) +'/?s='+ entity
         page = requests.get(url).text
@@ -31,7 +32,7 @@ def newsbtc_scrape(entity, start_date, end_date):
         for res in soup.find_all('article'):
             article_url = res.h3.a['href']
             
-            #Retrieve date of article
+            # retrieve date of article
             split_url = article_url.split("/")
             try:
                 int(split_url[3])
@@ -40,7 +41,7 @@ def newsbtc_scrape(entity, start_date, end_date):
             except ValueError:
                 continue
             
-            #if current date is within time frame, retrieve all info and store in dataframe
+            # if current date is within time frame, retrieve all info and store in dataframe
             if d <= end_date and d >= start_date:
                 data['date_time'].append(d)    
                 data['article_url'].append(article_url)
@@ -61,7 +62,12 @@ def newsbtc_scrape(entity, start_date, end_date):
                 author_url = author_a.a.get('href')
                 data['author_url'].append(author_url)
                 
-    #Return dataframe of data     
+    # return dataframe of data     
     df = pd.DataFrame(data)
     return df
 
+# test
+# entity = 'binance'
+# start_date = datetime(2020, 7, 1)
+# end_date = datetime(2020, 9, 1)
+# test = newsbtc_scrape(entity, start_date, end_date)

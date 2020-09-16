@@ -21,11 +21,19 @@ def coindesk_scrape(entity, start_date, end_date):
     search = f"{website}search?q={entity}&s=relevant"
     driver.get(search)
 
+    column_names = ["date_time", "title", "excerpt", "article_url",  "category"]
+    df = pd.DataFrame(columns = column_names)
+
     # preliminary search of all articles
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
     time.sleep(3)
     articles = driver.find_elements_by_class_name("list-item-wrapper")
-    soup = BeautifulSoup(articles[-2].get_attribute("innerHTML"), features="html.parser")
+    
+    try:
+        soup = BeautifulSoup(articles[-2].get_attribute("innerHTML"), features="html.parser")
+    except:
+        driver.quit()
+        return df
 
     # time 1
     date_string = date_string = soup.find("time").text
@@ -34,13 +42,17 @@ def coindesk_scrape(entity, start_date, end_date):
     # keep pressing load more button until reach start date
     current_date = date_time
     while current_date >= start_date:
-        # refind load button and press
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-        time.sleep(2)
-        load_more_button = driver.find_element_by_xpath("//button[@class='button primary-button primary-button-default']")
-        action = ActionChains(driver)
-        action.move_to_element(load_more_button).click(load_more_button).perform()
-        time.sleep(3)
+        try: 
+            # refind load button and press
+            # driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
+            # time.sleep(2)
+            load_more_button = driver.find_element_by_xpath("//button[@class='button primary-button primary-button-default']")
+            action = ActionChains(driver)
+            action.move_to_element(load_more_button).click(load_more_button).perform()
+            time.sleep(3)
+        except:
+            # no more pages to load
+            break
 
         # retrieve articles again
         articles = driver.find_elements_by_class_name("list-item-wrapper")
@@ -51,9 +63,6 @@ def coindesk_scrape(entity, start_date, end_date):
         date_time = datetime.strptime(date_string, "%b %d, %Y")
 
         current_date = date_time    
-        
-    column_names = ["date_time", "title", "excerpt", "article_url",  "category"]
-    df = pd.DataFrame(columns = column_names)
 
     # retrieve details from all articles
     for article in articles[:-1]: 
@@ -65,6 +74,9 @@ def coindesk_scrape(entity, start_date, end_date):
 
         if date_time > end_date:
             continue
+
+        if date_time < start_date:
+            break
 
         # retrieve category, url, text and excerpt
         article_module = soup.find(class_="text-content")
@@ -84,7 +96,3 @@ def coindesk_scrape(entity, start_date, end_date):
 # start_date = datetime(2020, 8, 27)
 # end_date = datetime(2020, 8, 28)
 # test = coindesk_scrape("bitcoin", start_date, end_date)
-
-
-
-
