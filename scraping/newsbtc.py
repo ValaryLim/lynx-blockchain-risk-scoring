@@ -70,4 +70,8 @@ def newsbtc_scrape(entity, start_date, end_date):
 # entity = 'binance'
 # start_date = datetime(2020, 7, 1)
 # end_date = datetime(2020, 9, 1)
+<<<<<<< HEAD
 # test = newsbtc_scrape(entity, start_date, end_date)
+=======
+# test = newsbtc_scrape(entity, start_date, end_date)
+>>>>>>> master
