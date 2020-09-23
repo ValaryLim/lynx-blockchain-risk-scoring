@@ -11,6 +11,7 @@ scraping/utils/__pycache__
 
 sentiment-analysis/data
 sentiment-analysis/utils/fasttext
+sentiment-analysis/models
 
 .gitsecret/keys/random_seed
 !*.secret
