@@ -14,6 +14,13 @@ sys.path.insert(1, '../scraping')
 from main_conventional import conventional_scrape_by_entity
 from main_crypto import crypto_scrape_by_entity
 
+# data processing
+import string 
+import nltk
+from nltk.stem import WordNetLemmatizer # word lemmatizer
+from nltk.stem.snowball import SnowballStemmer
+from nltk.corpus import stopwords # stopwords
+
 # models
 import fasttext
 
@@ -121,6 +128,46 @@ def generate_table(name, dataframe, max_rows=10):
         ])
     ])
 
+def pre_processing(text, lemmatize=True, stem=False):
+    '''
+    Preprocessing for fasttext model
+    '''
+    # strip accents
+    text = text.encode('ascii', 'ignore')
+    text = str(text.decode("utf-8"))
+
+    # covert to lowercase
+    text = text.lower()
+
+    # remove punctuation
+    text = text.translate(str.maketrans(string.punctuation, ' '*len(string.punctuation)))
+
+    # remove unnecessary white spaces
+    text = text.replace("\n", "")
+
+    # tokenize
+    text_words = nltk.word_tokenize(text)
+
+    # lemmatize
+    if lemmatize:
+        wordnet_lemmatizer = WordNetLemmatizer()
+        text_words = [wordnet_lemmatizer.lemmatize(x, pos="v") for x in text_words]
+
+    # stem
+    if stem:
+        stemmer = SnowballStemmer("english")
+        text_words = [stemmer.stem(x) for x in text_words]
+
+    # remove stop words
+    stop = list(stopwords.words('english'))
+    keep_stopwords = ["no", "not", "nor"]
+    for word in keep_stopwords:
+        stop.remove(word)
+        stop = set(stop)
+    text_words = [x for x in text_words if not x in stop]
+
+    return ' '.join(text_words)
+
 # when submit button is pressed, run query
 @app.callback(
     [Output("conventional-news", "children"),
@@ -143,7 +190,18 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
     
     # retrieve data based on information
     crypto_df = conventional_scrape_by_entity(entity, start_date_datetime, end_date_datetime)
-    crypto_df = pd.concat([crypto_df, crypto_scrape_by_entity(entity, start_date_datetime, end_date_datetime)])[["date_time", "title"]]
+    crypto_df = pd.concat([crypto_df, crypto_scrape_by_entity(entity, start_date_datetime, end_date_datetime)])
+    crypto_df["text"] = crypto_df["title"].fillna('') + " " + crypto_df["excerpt"].fillna('')
+    
+    # process text for modelling
+    crypto_df["text_processed"] =  crypto_df["text"].apply(lambda x: pre_processing(x, lemmatize=True, stem=False))
+
+    # load model (TEMP)
+    model_fasttext = fasttext.load_model("../sentiment-analysis/models/fasttext/sample_all_lemmatize.bin")
+    crypto_df["label"] = crypto_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
+
+    # slice dataframe
+    crypto_df = crypto_df[["date_time", "text", "label"]]
 
     return (generate_table("Conventional and Cryptonews", crypto_df), None, None)
 
