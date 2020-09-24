@@ -9,5 +9,9 @@ scraping/data
 scraping/utils/chromedriver
 scraping/utils/__pycache__
 
+sentiment-analysis/models
+sentiment-analysis/data
+sentiment-analysis/utils
+
 .gitsecret/keys/random_seed
 !*.secret
