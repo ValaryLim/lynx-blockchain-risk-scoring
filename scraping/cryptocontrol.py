@@ -5,7 +5,7 @@ import pandas as pd
 import json
 
 def cryptocontrol_scrape(entity):
-    with open('api_key.json') as f:
+    with open('../scraping/api_key.json') as f:
         api_key = json.load(f)['cryptocontrol']
 
     # connect to CryptoControlAPI
