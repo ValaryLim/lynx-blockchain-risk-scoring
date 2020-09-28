@@ -13,6 +13,7 @@ import sys
 sys.path.insert(1, '../scraping')
 from main_conventional import conventional_scrape_by_entity
 from main_crypto import crypto_scrape_by_entity
+from reddit import reddit_scrape_byentity
 
 # data processing
 import string 
@@ -23,6 +24,8 @@ from nltk.corpus import stopwords # stopwords
 
 # models
 import fasttext
+sys.path.insert(1, '../sentiment-analysis')
+from vader import vader_predict
 
 # set application
 app = dash.Dash(__name__, external_stylesheets=["assets/datepicker.css", dbc.themes.BOOTSTRAP])
@@ -193,17 +196,28 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
     crypto_df = pd.concat([crypto_df, crypto_scrape_by_entity(entity, start_date_datetime, end_date_datetime)])
     crypto_df["text"] = crypto_df["title"].fillna('') + " " + crypto_df["excerpt"].fillna('')
     
-    # process text for modelling
-    crypto_df["text_processed"] =  crypto_df["text"].apply(lambda x: pre_processing(x, lemmatize=True, stem=False))
+    reddit_df = reddit_scrape_byentity(entity, start_date_datetime, end_date_datetime)
+    reddit_df["text"] = reddit_df["title"].fillna('') + " " + reddit_df["excerpt"].fillna('')
 
-    # load model (TEMP)
-    model_fasttext = fasttext.load_model("../sentiment-analysis/models/fasttext/sample_all_lemmatize.bin")
-    crypto_df["label"] = crypto_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
+    # process text for modelling
+    crypto_df["text_processed"] = crypto_df["text"].apply(lambda x: pre_processing(x, lemmatize=True, stem=False))
+    reddit_df["text_processed"] = reddit_df["text"].apply(lambda x: pre_processing(x, lemmatize=True, stem=False))
+
+    # load model
+    if model == 'fasttext':
+        model_fasttext = fasttext.load_model("../sentiment-analysis/models/fasttext/sample_all_lemmatize.bin")
+        crypto_df["label"] = crypto_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
+        reddit_df["label"] = reddit_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
+
+    elif model == 'vader':
+        crypto_df["label"] = crypto_df["text"].apply(lambda x: vader_predict(x))
+        reddit_df["label"] = reddit_df["text"].apply(lambda x: vader_predict(x))
 
     # slice dataframe
     crypto_df = crypto_df[["date_time", "text", "label"]]
+    reddit_df = reddit_df[["date_time", "text", "label"]]
 
-    return (generate_table("Conventional and Cryptonews", crypto_df), None, None)
+    return (generate_table("Conventional and Cryptonews", crypto_df),  generate_table("Reddit", reddit_df), None)
 
 if __name__ == "__main__":
     app.run_server(debug=True, host='127.0.0.1')
