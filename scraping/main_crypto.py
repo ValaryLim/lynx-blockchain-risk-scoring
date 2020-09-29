@@ -40,7 +40,8 @@ def crypto_scrape_by_entity(entity, start_date, end_date):
     # retrieve from sites that require selenium
     # only for recent articles
     if time_delta <= 31:
-        functions_lst = [bitcoin_scrape, bitcoinist_scrape, \
+        # removed: bitcoinist_scrape, 
+        functions_lst = [bitcoin_scrape, \
                         bitnewstoday_scrape, coindesk_scrape, \
                         cointelegraph_scrape, cryptonews_scrape, \
                         cryptoslate_scrape, forbes_scrape, \
