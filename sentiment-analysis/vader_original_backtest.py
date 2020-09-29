@@ -6,13 +6,13 @@ import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 #Import training data
-train = pd.read_csv('/Users/JX/Desktop/BT4103/5Model/Train_test/all_train.csv')
+train = pd.read_csv('all_train.csv')
 
 #Import test data
-test_all = pd.read_csv('/Users/JX/Desktop/BT4103/5Model/Train_test/all_test.csv')
-test_news = pd.read_csv('/Users/JX/Desktop/BT4103/5Model/Train_test/news_test.csv')
-test_reddit = pd.read_csv('/Users/JX/Desktop/BT4103/5Model/Train_test/reddit_test.csv')
-test_twitter = pd.read_csv('/Users/JX/Desktop/BT4103/5Model/Train_test/twitter_test.csv')
+test_all = pd.read_csv('all_test.csv')
+test_news = pd.read_csv('news_test.csv')
+test_reddit = pd.read_csv('reddit_test.csv')
+test_twitter = pd.read_csv('twitter_test.csv')
 
 #Initialise VADER sentiment analyzer
 SIA = SentimentIntensityAnalyzer()
