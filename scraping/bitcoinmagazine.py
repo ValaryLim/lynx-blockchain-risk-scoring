@@ -75,8 +75,4 @@ def bitcoinmagazine_scrape(entity, start_date, end_date):
 ## df = bitcoinmagazine_scrape(entity, start_date, end_date)
 ## print(df)
 #########################################
-<<<<<<< HEAD
 ## df.to_csv(r'file.csv')
-=======
-## df.to_csv(r'file.csv')
->>>>>>> master
