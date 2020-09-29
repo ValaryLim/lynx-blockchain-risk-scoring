@@ -14,12 +14,8 @@ def filter_out(sentence):
         'prediction', 'forecast', 'top', 'return', 'gift', 'demand', 'trend', 'shop', 'buy',\
         'brief', 'tip', 'complete', 'expand', 'improve', 'retail', 'explain', 'investment', \
         'sentiment', 'rewind', 'trader', 'trade', 'innovation', 'joke', 'tax', 'pros', 'rewind', \
-<<<<<<< HEAD
-        'hype', 'how'}
-=======
         'hype', 'how', 'war', 'drop', 'falling', 'inflation', 'remedy', 'recover', 'introduction',\
         'investors', 'dip', 'legalize', 'regulate', 'launch', 'support', 'grant', 'arbitrage'}
->>>>>>> master
 
     # if there exist no sentence (excerpt), return True
     if type(sentence) != str:
