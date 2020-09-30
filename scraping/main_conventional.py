@@ -1,11 +1,11 @@
 import pandas as pd
 from datetime import datetime, timedelta
 
-from google import google_scrape
 from theguardian import theguardian_scrape
+from google1 import google_scrape
 from cryptocontrol import cryptocontrol_scrape
 
-from utils/data_filter import filter_out
+from utils.data_filter import filter_out
 
 def conventional_scrape_by_entity(entity, start_date, end_date):
     column_names = ["date_time", "title", "excerpt", "domain", \

@@ -10,7 +10,7 @@ import time
 
 def cryptoslate_scrape(entity, start_date, end_date): 
     # create driver
-    driver = webdriver.Chrome('./utils/chromedriver')
+    driver = webdriver.Chrome('../scraping/utils/chromedriver')
 
     entity_name = entity.replace(" ", "+")
 
