@@ -1,4 +1,8 @@
 import string # for punctuation
+<<<<<<< HEAD
+=======
+import math
+>>>>>>> master
 import nltk
 from nltk.stem import WordNetLemmatizer 
 
@@ -11,7 +15,19 @@ def filter_out(sentence):
         'update', 'winner', 'history', 'competition', 'review', 'welcome', 'bull', 'bear', \
         'perform', 'cost', 'discount', 'spend', 'perform', 'potential', 'interest', 'success',\
         'prediction', 'forecast', 'top', 'return', 'gift', 'demand', 'trend', 'shop', 'buy',\
+<<<<<<< HEAD
         'brief', 'tip', 'complete', 'expand', 'improve', 'retail', 'explain', 'investment'}
+=======
+        'brief', 'tip', 'complete', 'expand', 'improve', 'retail', 'explain', 'investment', \
+        'sentiment', 'rewind', 'trader', 'trade', 'innovation', 'joke', 'tax', 'pros', 'rewind', \
+        'hype', 'how', 'war', 'drop', 'falling', 'inflation', 'remedy', 'recover', 'introduction',\
+        'investors', 'dip', 'legalize', 'regulate', 'launch', 'support', 'grant', 'arbitrage'}
+
+    # if there exist no sentence (excerpt), return True
+    if type(sentence) != str:
+        if math.isnan(sentence):
+            return True
+>>>>>>> master
 
     # pre-process sentence
     processed_sentence = pre_processing(sentence)
@@ -22,6 +38,33 @@ def filter_out(sentence):
 
     return True
 
+<<<<<<< HEAD
+=======
+
+
+def filter_in(sentence):
+    '''
+    Output: True if sentence should be kept, False otherwise 
+    '''
+    # set of words to filter out (lemmatized)
+    filter_set = {'unsecure','insecure', 'secure', 'security', 'breach', 'hack', 'compromise',\
+        'steal', 'fraud', 'scam', 'heist', 'attack', 'malware', 'suspicious', 'cryptojacking',\
+        'launder', 'allegation','raid', 'emergency', 'suspect', 'risk', 'chaos', 'assault',\
+        'theft', 'criticism','shutdown', 'down', 'disable', 'regulate', 'phish', 'illegal',\
+        'fake', 'suspend','vulnerable', 'leak', 'fraudster'}
+
+    # pre-process sentence
+    processed_sentence = pre_processing(sentence)
+
+    for word in processed_sentence:
+        if word in filter_set: 
+            return True
+    
+    return False
+
+
+
+>>>>>>> master
 def pre_processing(sentence):
     wordnet_lemmatizer = WordNetLemmatizer()
 

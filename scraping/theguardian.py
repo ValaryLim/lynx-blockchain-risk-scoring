@@ -4,6 +4,10 @@ from datetime import datetime
 import pandas as pd
 
 def theguardian_scrape(entity, start_date, end_date):
+    # get api key
+    with open('../scraping/api_key.json') as f:
+        api_key = json.load(f)['theguardian']
+        
     # set search parameters
     search_api_url = "http://content.guardianapis.com/search"
     search_params = {
@@ -13,7 +17,7 @@ def theguardian_scrape(entity, start_date, end_date):
         "order-by": "newest",
         "show-fields": "all",
         "page-size": 200,
-        "api-key": "0c96df6a-0f51-4263-8013-274156d8db83"
+        "api-key": api_key
     }
 
     # retrieve results
@@ -62,7 +66,7 @@ def theguardian_scrape(entity, start_date, end_date):
     return df
 
 # entity = "Wrapped Ether"
-# start_date = datetime(2018, 1, 1)
-# end_date = datetime(2019, 12, 31)
+# start_date = datetime(2019, 1, 1)
+# end_date = datetime(2019, 3, 30)
 # df = theguardian_scrape(entity, start_date, end_date)
 # print(df)

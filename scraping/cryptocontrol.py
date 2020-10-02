@@ -2,9 +2,11 @@ from crypto_news_api import CryptoControlAPI
 from datetime import datetime
 import numpy as np
 import pandas as pd
+import json
 
 def cryptocontrol_scrape(entity):
-    api_key = "4f1bbb0113c9072c0efdae37f2fbe518"
+    with open('../scraping/api_key.json') as f:
+        api_key = json.load(f)['cryptocontrol']
 
     # connect to CryptoControlAPI
     api = CryptoControlAPI(api_key)
