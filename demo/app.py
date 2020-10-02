@@ -26,7 +26,7 @@ from nltk.corpus import stopwords # stopwords
 import fasttext
 sys.path.insert(1, '../sentiment-analysis')
 from vader import vader_predict
-# from word2vec import word2vec_predict
+from word2vec_demo import word2vec_predict
 
 # set application
 app = dash.Dash(__name__, external_stylesheets=["assets/datepicker.css", dbc.themes.BOOTSTRAP])
@@ -67,7 +67,7 @@ model_input = html.Div([
         options=[
             {"label": "BERT", "value": "bert"},
             {"label": "FastText", "value": "fasttext"},
-            {"label": "Word2Vec", "value": "wordvec"},
+            {"label": "Word2Vec", "value": "Word2Vec"},
             {"label": "Vader", "value": "vader"},
         ],
         id="model-input", value="bert", inline=True,
