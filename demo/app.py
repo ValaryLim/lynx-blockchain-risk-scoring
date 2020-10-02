@@ -26,6 +26,7 @@ from nltk.corpus import stopwords # stopwords
 import fasttext
 sys.path.insert(1, '../sentiment-analysis')
 from vader import vader_predict
+# from word2vec import word2vec_predict
 
 # set application
 app = dash.Dash(__name__, external_stylesheets=["assets/datepicker.css", dbc.themes.BOOTSTRAP])
@@ -66,7 +67,7 @@ model_input = html.Div([
         options=[
             {"label": "BERT", "value": "bert"},
             {"label": "FastText", "value": "fasttext"},
-            {"label": "Word-2-Vec", "value": "wordvec"},
+            {"label": "Word2Vec", "value": "wordvec"},
             {"label": "Vader", "value": "vader"},
         ],
         id="model-input", value="bert", inline=True,
@@ -212,6 +213,10 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
     elif model == 'vader':
         crypto_df["label"] = crypto_df["text"].apply(lambda x: vader_predict(x))
         reddit_df["label"] = reddit_df["text"].apply(lambda x: vader_predict(x))
+    
+    elif model == 'Word2Vec':
+        crypto_df["label"] = crypto_df["text"].apply(lambda x: word2vec_predict(x))
+        reddit_df["label"] = reddit_df["text"].apply(lambda x: word2vec_predict(x))
 
     # slice dataframe
     crypto_df = crypto_df[["date_time", "text", "label"]]
