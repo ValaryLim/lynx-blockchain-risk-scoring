@@ -5,7 +5,7 @@ import pandas as pd
 
 def theguardian_scrape(entity, start_date, end_date):
     # get api key
-    with open('api_key.json') as f:
+    with open('../scraping/api_key.json') as f:
         api_key = json.load(f)['theguardian']
         
     # set search parameters
@@ -66,7 +66,7 @@ def theguardian_scrape(entity, start_date, end_date):
     return df
 
 # entity = "Wrapped Ether"
-# start_date = datetime(2018, 1, 1)
-# end_date = datetime(2019, 12, 31)
+# start_date = datetime(2019, 1, 1)
+# end_date = datetime(2019, 3, 30)
 # df = theguardian_scrape(entity, start_date, end_date)
 # print(df)

@@ -9,7 +9,7 @@ import time
 def forbes_scrape(entity, start_date, end_date):
     entity = entity.replace(' ','+')
 
-    driver = webdriver.Chrome('./utils/chromedriver')
+    driver = webdriver.Chrome('../scraping/utils/chromedriver')
 
 
     data = {'date_time':[], 'title':[], 'excerpt':[], 'article_url':[], 'author':[], 'author_url':[]}
