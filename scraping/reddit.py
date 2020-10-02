@@ -89,7 +89,7 @@ def reddit_scrape_byentity(entity, start_date, end_date):
     df['entity'] = entity
     
     #Filter the data with relevant keywords
-    df.fillna('')
+    df = df.fillna('')
     df = df[df.apply(lambda x: filter_in(x["title"]) or filter_in(x["excerpt"]), axis=1)]
     df = df[df.apply(lambda x: filter_out(x["title"]) and filter_out(x["excerpt"]), axis=1)]
 
