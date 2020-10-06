@@ -15,7 +15,7 @@ def cointelegraph_scrape(entity, start_date, end_date):
     chrome_options.add_experimental_option("prefs", prefs)
     
     # create driver
-    driver = webdriver.Chrome('./utils/chromedriver', options=chrome_options)
+    driver = webdriver.Chrome('../scraping/utils/chromedriver', options=chrome_options)
 
     # search for webpage
     search = f"https://cointelegraph.com/search?query={entity}"

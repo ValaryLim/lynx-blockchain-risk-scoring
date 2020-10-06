@@ -15,7 +15,7 @@ def bitcoinist_scrape(entity, start_date, end_date):
     chrome_options.add_experimental_option("prefs", prefs)
 
     # create driver
-    driver = webdriver.Chrome('./utils/chromedriver')
+    driver = webdriver.Chrome('../scraping/utils/chromedriver')
 
     # search for webpage
     entity_name = entity.replace(" ", "+")
