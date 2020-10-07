@@ -237,6 +237,9 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
         crypto_df["label"] = pred
         pred, raw_outputs = model.predict(reddit_df['text'])
         reddit_df["label"] = pred
+        pred, raw_outputs = model.predict(twitter_df['text'])
+        twitter_df["label"] = pred
+
 
     # slice dataframe
     crypto_df = crypto_df[["date_time", "text", "label"]]
