@@ -10,7 +10,7 @@ from datetime import datetime
 
 # data
 import sys
-sys.path.insert(1, './scraping')
+sys.path.insert(1, '../scraping')
 from main_conventional import conventional_scrape_by_entity
 from main_crypto import crypto_scrape_by_entity
 from reddit import reddit_scrape_byentity
@@ -25,7 +25,7 @@ from nltk.corpus import stopwords # stopwords
 
 # models
 import fasttext
-sys.path.insert(1, './sentiment-analysis')
+sys.path.insert(1, '../sentiment-analysis')
 from vader import vader_predict
 from word2vec_demo import word2vec_predict
 from simpletransformers.classification import ClassificationModel, ClassificationArgs

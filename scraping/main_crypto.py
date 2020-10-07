@@ -12,7 +12,7 @@ from insidebitcoins import insidebitcoins_scrape
 from nulltx import nulltx_scrape
 
 import sys
-sys.path.insert(1, '/Users/pengtai.xu/Desktop/Y3S1/Capstone/github/lynx-blockchain-risk-scoring/scraping/utils')
+sys.path.insert(1, './utils')
 from data_filter import filter_out
 
 # means it requires selenium

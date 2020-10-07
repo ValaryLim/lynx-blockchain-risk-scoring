@@ -6,7 +6,7 @@ from google1 import google_scrape
 from cryptocontrol import cryptocontrol_scrape
 
 import sys
-sys.path.insert(1, '/Users/pengtai.xu/Desktop/Y3S1/Capstone/github/lynx-blockchain-risk-scoring/scraping/utils')
+sys.path.insert(1, './utils')
 from data_filter import filter_out
 
 def conventional_scrape_by_entity(entity, start_date, end_date):
