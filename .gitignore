@@ -18,7 +18,6 @@ sentiment-analysis/cache_dir
 sentiment-analysis/.ipynb_checkpoints
 sentiment-analysis/models
 sentiment-analysis/__pycache__
-sentiment-analysis/utils
 
 .gitsecret/keys/random_seed
 !*.secret
