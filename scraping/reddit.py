@@ -2,7 +2,7 @@ import pandas as pd
 from psaw import PushshiftAPI
 from datetime import datetime, timedelta
 import sys
-sys.path.insert(1, '/Users/pengtai.xu/Desktop/Y3S1/Capstone/github/lynx-blockchain-risk-scoring/scraping/utils')
+sys.path.insert(1, './utils')
 from data_filter import filter_in
 from data_filter import filter_out
 #, filter_in
