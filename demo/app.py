@@ -10,10 +10,11 @@ from datetime import datetime
 
 # data
 import sys
-sys.path.insert(1, './scraping')
+sys.path.insert(1, '../scraping')
 from main_conventional import conventional_scrape_by_entity
 from main_crypto import crypto_scrape_by_entity
 from reddit import reddit_scrape_byentity
+from twitter_twint import twitter_scrape_byentity
 
 # data processing
 import string 
@@ -24,8 +25,9 @@ from nltk.corpus import stopwords # stopwords
 
 # models
 import fasttext
-sys.path.insert(1, './sentiment-analysis')
+sys.path.insert(1, '../sentiment-analysis')
 from vader import vader_predict
+from word2vec_demo import word2vec_predict
 from simpletransformers.classification import ClassificationModel, ClassificationArgs
 
 # set application
@@ -67,7 +69,7 @@ model_input = html.Div([
         options=[
             {"label": "BERT", "value": "bert"},
             {"label": "FastText", "value": "fasttext"},
-            {"label": "Word-2-Vec", "value": "wordvec"},
+            {"label": "Word2Vec", "value": "Word2Vec"},
             {"label": "Vader", "value": "vader"},
         ],
         id="model-input", value="bert", inline=True,
@@ -200,20 +202,31 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
     reddit_df = reddit_scrape_byentity(entity, start_date_datetime, end_date_datetime).reset_index(drop=True)
     reddit_df["text"] = reddit_df["title"].fillna('') + " " + reddit_df["excerpt"].fillna('')
 
+    twitter_df = twitter_scrape_byentity(entity, start_date_datetime, end_date_datetime)
+    twitter_df["text"] = twitter_df["tweet"].fillna('')
+
     # process text for modelling
     crypto_df["text_processed"] = crypto_df["text"].apply(lambda x: pre_processing(x, lemmatize=True, stem=False))
     reddit_df["text_processed"] = reddit_df["text"].apply(lambda x: pre_processing(x, lemmatize=True, stem=False))
+    twitter_df["text_processed"] = twitter_df["text"].apply(lambda x: pre_processing(x, lemmatize=True, stem=False))
 
     # load model
     if model == 'fasttext':
         model_fasttext = fasttext.load_model("./sentiment-analysis/models/fasttext/sample_all_lemmatize.bin")
         crypto_df["label"] = crypto_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
         reddit_df["label"] = reddit_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
+        twitter_df["label"] = twitter_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
 
     elif model == 'vader':
         crypto_df["label"] = crypto_df["text"].apply(lambda x: vader_predict(x))
         reddit_df["label"] = reddit_df["text"].apply(lambda x: vader_predict(x))
+        twitter_df["label"] = twitter_df["text"].apply(lambda x: vader_predict(x))
     
+    elif model == 'Word2Vec':
+        crypto_df["label"] = crypto_df["text_processed"].apply(lambda x: word2vec_predict(x))
+        reddit_df["label"] = reddit_df["text_processed"].apply(lambda x: word2vec_predict(x))
+        twitter_df["label"] = twitter_df["text_processed"].apply(lambda x: word2vec_predict(x))
+
     elif model == 'bert':
         # specifying bert model arguments
         model_args = ClassificationArgs(num_train_epochs=2, learning_rate = 5e-5)
@@ -224,12 +237,16 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
         crypto_df["label"] = pred
         pred, raw_outputs = model.predict(reddit_df['text'])
         reddit_df["label"] = pred
+        pred, raw_outputs = model.predict(twitter_df['text'])
+        twitter_df["label"] = pred
+
 
     # slice dataframe
     crypto_df = crypto_df[["date_time", "text", "label"]]
     reddit_df = reddit_df[["date_time", "text", "label"]]
+    twitter_df = twitter_df[["date", "text", "label"]]
 
-    return (generate_table("Conventional and Cryptonews", crypto_df),  generate_table("Reddit", reddit_df), None)
+    return (generate_table("Conventional and Cryptonews", crypto_df),  generate_table("Reddit", reddit_df), generate_table("Twitter", twitter_df))
 
 if __name__ == "__main__":
     app.run_server(debug=True, host='127.0.0.1')

@@ -1,8 +1,11 @@
 import pandas as pd
 from psaw import PushshiftAPI
 from datetime import datetime, timedelta
-from utils.data_filter import filter_out, filter_in
-
+import sys
+sys.path.insert(1, './utils')
+from data_filter import filter_in
+from data_filter import filter_out
+#, filter_in
 
 def reddit_scrape_byentity(entity, start_date, end_date):
 

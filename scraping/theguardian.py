@@ -5,7 +5,7 @@ import pandas as pd
 
 def theguardian_scrape(entity, start_date, end_date):
     # get api key
-    with open('./scraping/api_key.json') as f:
+    with open('./api_key.json') as f:
         api_key = json.load(f)['theguardian']
         
     # set search parameters
