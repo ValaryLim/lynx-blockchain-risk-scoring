@@ -10,7 +10,7 @@ from datetime import datetime
 
 # data
 import sys
-sys.path.insert(1, '../scraping')
+sys.path.insert(1, './scraping')
 from main_conventional import conventional_scrape_by_entity
 from main_crypto import crypto_scrape_by_entity
 from reddit import reddit_scrape_byentity
@@ -24,9 +24,10 @@ from nltk.corpus import stopwords # stopwords
 
 # models
 import fasttext
-sys.path.insert(1, '../sentiment-analysis')
+sys.path.insert(1, './sentiment-analysis')
 from vader import vader_predict
 from word2vec_demo import word2vec_predict
+from simpletransformers.classification import ClassificationModel, ClassificationArgs
 
 # set application
 app = dash.Dash(__name__, external_stylesheets=["assets/datepicker.css", dbc.themes.BOOTSTRAP])
@@ -197,7 +198,7 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
     crypto_df = pd.concat([crypto_df, crypto_scrape_by_entity(entity, start_date_datetime, end_date_datetime)])
     crypto_df["text"] = crypto_df["title"].fillna('') + " " + crypto_df["excerpt"].fillna('')
     
-    reddit_df = reddit_scrape_byentity(entity, start_date_datetime, end_date_datetime)
+    reddit_df = reddit_scrape_byentity(entity, start_date_datetime, end_date_datetime).reset_index(drop=True)
     reddit_df["text"] = reddit_df["title"].fillna('') + " " + reddit_df["excerpt"].fillna('')
 
     # process text for modelling
@@ -206,7 +207,7 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
 
     # load model
     if model == 'fasttext':
-        model_fasttext = fasttext.load_model("../sentiment-analysis/models/fasttext/sample_all_lemmatize.bin")
+        model_fasttext = fasttext.load_model("./sentiment-analysis/models/fasttext/sample_all_lemmatize.bin")
         crypto_df["label"] = crypto_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
         reddit_df["label"] = reddit_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
 
@@ -217,6 +218,17 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
     elif model == 'Word2Vec':
         crypto_df["label"] = crypto_df["text"].apply(lambda x: word2vec_predict(x))
         reddit_df["label"] = reddit_df["text"].apply(lambda x: word2vec_predict(x))
+        
+    elif model == 'bert':
+        # specifying bert model arguments
+        model_args = ClassificationArgs(num_train_epochs=2, learning_rate = 5e-5)
+        # load bert model - change the directory of the bert model respectively
+        model = ClassificationModel(model_type = 'bert', model_name = './sentiment-analysis/models/bert/outputs_bert_base_cased/', \
+                                    args = model_args, use_cuda = False)
+        pred, raw_outputs = model.predict(crypto_df['text'])
+        crypto_df["label"] = pred
+        pred, raw_outputs = model.predict(reddit_df['text'])
+        reddit_df["label"] = pred
 
     # slice dataframe
     crypto_df = crypto_df[["date_time", "text", "label"]]
