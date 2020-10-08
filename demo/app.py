@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+import plotly.express as px
 
 import pandas as pd
 from datetime import datetime
@@ -106,6 +107,7 @@ sidebar = html.Div(
 
 #### CONTENT ##################################################################
 content = html.Div([
+    html.Div(id = "graph"),
     html.Div(id="conventional-news"),
     html.Div(id="reddit-news"),
     html.Div(id="twitter-news"),
@@ -133,6 +135,68 @@ def generate_table(name, dataframe, max_rows=10):
             ])
         ])
     ])
+
+
+
+def generate_graph(crypto_df, reddit_df, twitter_df, start_date, end_date):
+    
+    df1 = get_count_by_date(crypto_df, start_date, end_date)
+    df2 = get_count_by_date(reddit_df, start_date, end_date)
+    df3 = get_count_by_date(twitter_df, start_date, end_date)
+
+    print(crypto_df)
+
+    df1['source_type'] = 'crypto'
+    df2['source_type'] = 'reddit'
+    df3['source_type'] = 'twitter'
+
+    result = pd.concat([df1, df2], ignore_index=True, sort=False)
+    result = pd.concat([result, df3], ignore_index=True, sort=False)
+    result['date'] = result['index'].dt.date
+
+    fig = px.line(result, x= 'index', y='label', color='source_type')
+    
+    fig.update_layout(
+        title="Number of posts/articles labelled high-risk over time",
+        title_x=0.5,
+        xaxis_title="Date",
+        yaxis_title="Count",
+        legend_title="Source"
+    )
+    
+    return html.Div(
+        dcc.Graph(
+        id='graph',
+        figure=fig,
+        )
+    )
+
+
+def get_count_by_date(df, start_date, end_date):
+    
+    # Process dataframe
+    # Get datetime format for df date
+    for fmt in ('%Y-%m-%d %H:%M:%S', '%d/%m/%y %H:%M', '%d/%m/%y'):
+        try:
+            df['date'] = pd.to_datetime(df.date_time, format=fmt)
+        except ValueError:
+            pass
+    
+    df['date'] = df['date'].dt.date
+
+    #Group data by date and find the number of posts predicted as risky 
+    df2 = df.groupby(['date']).sum()
+    df = df.drop(['date'], axis = 1)
+
+    #Get all date within range and fill dates with no data with 0 
+    idx = pd.date_range(start_date, end_date)
+    df2.index =  pd.DatetimeIndex(df2.index)
+    df2 = df2.reindex(idx, fill_value=0) 
+
+    df2 = df2.reset_index()
+    return df2
+
+
 
 def pre_processing(text, lemmatize=True, stem=False):
     '''
@@ -176,7 +240,8 @@ def pre_processing(text, lemmatize=True, stem=False):
 
 # when submit button is pressed, run query
 @app.callback(
-    [Output("conventional-news", "children"),
+    [Output("graph", "children"),
+    Output("conventional-news", "children"),
     Output("reddit-news", "children"),
     Output("twitter-news", "children")], 
     [Input("submit", "n_clicks")],
@@ -213,6 +278,7 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
     # load model
     if model == 'fasttext':
         model_fasttext = fasttext.load_model("./sentiment-analysis/models/fasttext/sample_all_lemmatize.bin")
+
         crypto_df["label"] = crypto_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
         reddit_df["label"] = reddit_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
         twitter_df["label"] = twitter_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
@@ -240,13 +306,17 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
         pred, raw_outputs = model.predict(twitter_df['text'])
         twitter_df["label"] = pred
 
+    
+    #Rename date to standardise format
+    twitter_df = twitter_df.rename(columns = {"date": "date_time"})
 
     # slice dataframe
-    crypto_df = crypto_df[["date_time", "text", "label"]]
-    reddit_df = reddit_df[["date_time", "text", "label"]]
-    twitter_df = twitter_df[["date", "text", "label"]]
+    crypto_df = crypto_df[["date_time", "text", "label"]].sort_values('label', ascending = False)
+    reddit_df = reddit_df[["date_time", "text", "label"]].sort_values('label', ascending = False)
+    twitter_df = twitter_df[["date_time", "text", "label"]].sort_values('label', ascending = False)
 
-    return (generate_table("Conventional and Cryptonews", crypto_df),  generate_table("Reddit", reddit_df), generate_table("Twitter", twitter_df))
+
+    return (generate_graph(crypto_df, reddit_df, twitter_df, str(start_date),str(end_date)), generate_table("Conventional and Cryptonews", crypto_df),  generate_table("Reddit", reddit_df), generate_table("Twitter", twitter_df))
 
 if __name__ == "__main__":
     app.run_server(debug=True, host='127.0.0.1')

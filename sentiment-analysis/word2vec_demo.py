@@ -4,9 +4,9 @@ import gensim
 import numpy as np
 
 model = models.KeyedVectors.load_word2vec_format(
-    '/Users/pengtai.xu/Desktop/Y3S1/Capstone/github/lynx-blockchain-risk-scoring/sentiment-analysis/models/word2vec/GoogleNews-vectors-negative300.bin', binary=True)
+    './models/word2vec/GoogleNews-vectors-negative300.bin', binary=True)
 
-svm = pickle.load(open('/Users/pengtai.xu/Desktop/Y3S1/Capstone/github/lynx-blockchain-risk-scoring/sentiment-analysis/models/word2vec/svm.txt', 'rb'))
+svm = pickle.load(open('./models/word2vec/svm.txt', 'rb'))
 
 def get_embed_features(text):
     # Tokenize the sentence

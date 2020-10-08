@@ -5,7 +5,6 @@ import sys
 sys.path.insert(1, './utils')
 from data_filter import filter_in
 from data_filter import filter_out
-#, filter_in
 
 def reddit_scrape_byentity(entity, start_date, end_date):
 
