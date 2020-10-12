@@ -13,10 +13,11 @@ sentiment-analysis/bert
 sentiment-analysis/data
 sentiment-analysis/runs
 sentiment-analysis/wandb
+sentiment-analysis/__pycache__
 sentiment-analysis/cache_dir
 sentiment-analysis/.ipynb_checkpoints
 sentiment-analysis/models
-sentiment-analysis/utils
+sentiment-analysis/__pycache__
 
 .gitsecret/keys/random_seed
 !*.secret
