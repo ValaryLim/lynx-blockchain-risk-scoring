@@ -13,7 +13,7 @@ from nulltx import nulltx_scrape
 
 import sys
 sys.path.insert(1, './utils')
-from data_filter import filter_out
+from data_filter import filter_out, filter_entity
 
 # means it requires selenium
 
@@ -62,7 +62,8 @@ def crypto_scrape_by_entity(entity, start_date, end_date):
         df = df.append(df_website)
         # print("scraping completed: " + website_name)
 
-    df = df[df.apply(lambda x: (filter_out(x["title"]) and (filter_out(x["excerpt"]))), axis=1)]
+    df = df[df.apply(lambda x: (filter_out(str(x["title"])) and (filter_out(str(x["excerpt"])))), axis=1)]
+    df = df[df.apply(lambda x: filter_entity(str(x["title"] + x["excerpt"]), entity), axis=1)]
     df = df.reset_index(drop = True)
 
     return df
@@ -77,10 +78,13 @@ def crypto_scrape(entity_list, start_date, end_date):
 
     df = pd.DataFrame(columns = column_names)
 
+    i = 0
     for entity in entity_list:
+        print(i, entity)
         entity_df = crypto_scrape_by_entity(entity, start_date, end_date)
         entity_df['entity'] = entity
         df = df.append(entity_df)
+        i += 1
 
     # drop columns where all rows are nan
     df = df.dropna(axis=1, how='all')
@@ -102,9 +106,8 @@ def crypto_scrape(entity_list, start_date, end_date):
 
 
 #### TESTING CRYPTO SCRAPE FUNCTION ###
-# entity_csv = pd.read_csv('data/entity_list.csv')
-# entity_list = list(entity_csv['entity'])
-# start_date = datetime(2018, 1, 1)
-# end_date = datetime(2019, 12, 31, 23, 59, 59)
-# test_df2 = crypto_scrape(entity_list, start_date, end_date)
+# entity_list = list(pd.read_csv("data/entity_list.csv")['entity'])
+# start_date = datetime(2020, 1, 1)
+# end_date = datetime(2020, 6, 30, 23, 59, 59)
+# data = crypto_scrape(entity_list, start_date, end_date)
 #################################################
