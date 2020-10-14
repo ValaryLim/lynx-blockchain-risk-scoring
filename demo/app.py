@@ -107,7 +107,7 @@ sidebar = html.Div(
 
 #### CONTENT ##################################################################
 content = html.Div([
-    html.Div(id = "graph"),
+    html.Div(id = "count-graph"),
     html.Div(id="conventional-news"),
     html.Div(id="reddit-news"),
     html.Div(id="twitter-news"),
@@ -136,15 +136,10 @@ def generate_table(name, dataframe, max_rows=10):
         ])
     ])
 
-
-
 def generate_graph(crypto_df, reddit_df, twitter_df, start_date, end_date):
-    
     df1 = get_count_by_date(crypto_df, start_date, end_date)
     df2 = get_count_by_date(reddit_df, start_date, end_date)
     df3 = get_count_by_date(twitter_df, start_date, end_date)
-
-    print(crypto_df)
 
     df1['source_type'] = 'crypto'
     df2['source_type'] = 'reddit'
@@ -164,13 +159,13 @@ def generate_graph(crypto_df, reddit_df, twitter_df, start_date, end_date):
         legend_title="Source"
     )
     
-    return html.Div(
-        dcc.Graph(
-        id='graph',
-        figure=fig,
-        )
+    count_graph = html.Div([
+        html.H5("Count of Risky Articles over Time"),
+        dcc.Graph(figure=fig)
+    ]
     )
-
+    
+    return count_graph
 
 def get_count_by_date(df, start_date, end_date):
     
@@ -240,7 +235,7 @@ def pre_processing(text, lemmatize=True, stem=False):
 
 # when submit button is pressed, run query
 @app.callback(
-    [Output("graph", "children"),
+    [Output("count-graph", "children"),
     Output("conventional-news", "children"),
     Output("reddit-news", "children"),
     Output("twitter-news", "children")], 
@@ -252,7 +247,7 @@ def pre_processing(text, lemmatize=True, stem=False):
 )
 def render_page_content(n_clicks, entity, model, start_date, end_date):
     if n_clicks == None:
-        return (None, None, None)
+        return (None, None, None, None)
 
     # convert start and end date to datetime
     start_date_datetime = datetime.strptime(start_date, "%Y-%m-%d")
@@ -277,7 +272,7 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
 
     # load model
     if model == 'fasttext':
-        model_fasttext = fasttext.load_model("./sentiment-analysis/models/fasttext/sample_all_lemmatize.bin")
+        model_fasttext = fasttext.load_model("../sentiment-analysis/models/fasttext/sample_all_lemmatize.bin")
 
         crypto_df["label"] = crypto_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
         reddit_df["label"] = reddit_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
@@ -297,7 +292,7 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
         # specifying bert model arguments
         model_args = ClassificationArgs(num_train_epochs=2, learning_rate = 5e-5)
         # load bert model - change the directory of the bert model respectively
-        model = ClassificationModel(model_type = 'bert', model_name = './sentiment-analysis/models/bert/outputs_bert_base_cased/', \
+        model = ClassificationModel(model_type = 'bert', model_name = '../sentiment-analysis/models/bert/outputs_bert_base_cased/', \
                                     args = model_args, use_cuda = False)
         pred, raw_outputs = model.predict(crypto_df['text'])
         crypto_df["label"] = pred
@@ -310,13 +305,23 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
     #Rename date to standardise format
     twitter_df = twitter_df.rename(columns = {"date": "date_time"})
 
+    # generate graph
+    count_graph = html.Div([
+        html.H5("Count of Risky Articles over Time")]
+    )
+    count_graph = generate_graph(crypto_df, reddit_df, twitter_df, str(start_date),str(end_date))
+
     # slice dataframe
     crypto_df = crypto_df[["date_time", "text", "label"]].sort_values('label', ascending = False)
     reddit_df = reddit_df[["date_time", "text", "label"]].sort_values('label', ascending = False)
     twitter_df = twitter_df[["date_time", "text", "label"]].sort_values('label', ascending = False)
 
+    # tables
+    crypto_table = generate_table("Conventional and Cryptonews", crypto_df)
+    reddit_table = generate_table("Reddit", reddit_df)
+    twitter_table = generate_table("Twitter", twitter_df)
 
-    return (generate_graph(crypto_df, reddit_df, twitter_df, str(start_date),str(end_date)), generate_table("Conventional and Cryptonews", crypto_df),  generate_table("Reddit", reddit_df), generate_table("Twitter", twitter_df))
+    return (count_graph, crypto_table, reddit_table, twitter_table)
 
 if __name__ == "__main__":
     app.run_server(debug=True, host='127.0.0.1')
