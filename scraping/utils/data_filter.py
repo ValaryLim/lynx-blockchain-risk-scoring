@@ -3,6 +3,9 @@ import math
 import nltk
 from nltk.stem import WordNetLemmatizer 
 
+def filter_entity(sentence, entity):
+    return (entity.lower() in sentence.lower())
+
 def filter_out(sentence):
     '''
     Output: True if sentence should be kept, False otherwise 

@@ -7,7 +7,7 @@ from cryptocontrol import cryptocontrol_scrape
 
 import sys
 sys.path.insert(1, './utils')
-from data_filter import filter_out
+from data_filter import filter_out, filter_entity
 
 def conventional_scrape_by_entity(entity, start_date, end_date):
     column_names = ["date_time", "title", "excerpt", "domain", \
@@ -40,7 +40,7 @@ def conventional_scrape_by_entity(entity, start_date, end_date):
     
     # filter out irrelevant data
     combined_df = combined_df[combined_df.apply(lambda x: filter_out(x["title"]) and filter_out(x["excerpt"]), axis=1)]
-    
+    combined_df = combined_df[combined_df.apply(lambda x: filter_entity(x["title"] + x["excerpt"], entity), axis=1)]
     return combined_df
 
 def conventional_scrape(entity_list, start_date, end_date):
@@ -127,12 +127,12 @@ def combine_samples(positive=[], negative=[]):
 ###################################################
 
 #### UNCOMMENT TO RETRIEVE NEGATIVE TEST CASES ####
-# start_date = datetime(2018, 1, 1, 0, 0, 0)
-# end_date = datetime(2019, 12, 31, 23, 59, 59)
+# start_date = datetime(2020, 1, 1, 0, 0, 0)
+# end_date = datetime(2020, 6, 30, 23, 59, 59)
 # entity_list = pd.read_csv("data/entity_list.csv", header=0)["entity"]
 # df = conventional_scrape(entity_list, start_date, end_date)
 # df["label"] = 0
-# df.to_csv("data/conventional_negative_unfiltered.csv")
+# df.to_csv("data/conventional_filtered_2020.csv")
 ###################################################
 
 #### UNCOMMENT TO COMBINE SAMPLES ####
