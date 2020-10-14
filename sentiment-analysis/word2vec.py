@@ -20,7 +20,7 @@ from sklearn.metrics import classification_report
 
 # download at: https://github.com/mmihaltz/word2vec-GoogleNews-vectors
 model = models.KeyedVectors.load_word2vec_format(
-    'utils/word2vec/GoogleNews-vectors-negative300.bin', binary=True)
+    'models/word2vec/GoogleNews-vectors-negative300.bin', binary=True)
 
 # functions
 
