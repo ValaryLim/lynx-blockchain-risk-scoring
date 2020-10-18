@@ -20,5 +20,7 @@ sentiment-analysis/.ipynb_checkpoints
 sentiment-analysis/models
 sentiment-analysis/utils/fasttext/
 
+evaluation/data
+
 .gitsecret/keys/random_seed
 !*.secret
