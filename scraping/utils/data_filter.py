@@ -4,7 +4,8 @@ import nltk
 from nltk.stem import WordNetLemmatizer 
 
 def filter_entity(sentence, entity):
-    return entity.lower() in str(sentence).lower()
+    sentence_list = list(str(sentence).lower().split())
+    return entity.lower() in sentence_list
 
 def filter_out(sentence):
     '''
