@@ -11,9 +11,9 @@ from forbes import forbes_scrape #
 from insidebitcoins import insidebitcoins_scrape
 from nulltx import nulltx_scrape
 
-import sys
-sys.path.insert(1, './utils')
-from data_filter import filter_out, filter_entity, process_duplicates
+# import sys
+# sys.path.insert(1, './utils')
+from utils.data_filter import filter_out, filter_entity, process_duplicates
 
 # means it requires selenium
 

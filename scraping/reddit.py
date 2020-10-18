@@ -1,9 +1,9 @@
 import pandas as pd
 from psaw import PushshiftAPI
 from datetime import datetime, timedelta
-import sys
-sys.path.insert(1, './utils')
-from data_filter import filter_in, filter_out, filter_entity, process_duplicates
+# import sys
+# sys.path.insert(1, './utils')
+from utils.data_filter import filter_in, filter_out, filter_entity, process_duplicates
 
 def reddit_scrape_byentity(entity, start_date, end_date):
 
@@ -125,4 +125,8 @@ def reddit_scrape(entity_list, start, end):
 
     return output_df
 
-
+# entity = 'binance'
+# start_date = datetime(2020, 1, 2)
+# end_date = datetime(2020, 1, 15)
+# df = reddit_scrape_byentity(entity, start_date, end_date)
+# print(df)
