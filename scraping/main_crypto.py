@@ -13,7 +13,7 @@ from nulltx import nulltx_scrape
 
 # import sys
 # sys.path.insert(1, './utils')
-from utils.data_filter import filter_out
+from utils.data_filter import filter_out, filter_entity, process_duplicates
 
 # means it requires selenium
 
@@ -60,11 +60,22 @@ def crypto_scrape_by_entity(entity, start_date, end_date):
         website_name = f.__name__[: -7]
         df_website['domain'] = website_name
         df = df.append(df_website)
-        # print("scraping completed: " + website_name)
+    
+    # get text column
+    df["text"] = df["title"].fillna("") + " " + df["excerpt"].fillna("")
+    
+    # filter out irrelevant data
+    mask1 = list(df.apply(lambda x: filter_out(x["title"]) and filter_out(x["excerpt"]), axis=1))
+    df = df[mask1]
+    mask2 = list(df.apply(lambda x: filter_entity(str(x["text"]), entity), axis=1))
+    df = df[mask2]
 
-    df = df[df.apply(lambda x: (filter_out(str(x["title"])) and (filter_out(str(x["excerpt"])))), axis=1)]
-    df = df[df.apply(lambda x: filter_entity(str(x["title"] + x["excerpt"]), entity), axis=1)]
-    df = df.reset_index(drop = True)
+    # label entity and group duplicates
+    df["entity"] = entity
+    df = process_duplicates(df)
+
+    # reset index
+    df = df.reset_index(drop=True)
 
     return df
 
@@ -89,18 +100,16 @@ def crypto_scrape(entity_list, start_date, end_date):
     # drop columns where all rows are nan
     df = df.dropna(axis=1, how='all')
 
-    # remove duplicates of title, excerpt
-    df.drop_duplicates(subset =["title", "excerpt", "entity"], keep = False, inplace = True) 
-
+    # reset index
     df = df.reset_index(drop = True)
     return df
 
 
 #### TESTING CRYPTO SCRAPE BY ENTITY FUNCTION ###
 # entity = 'binance'
-# start_date = datetime(2020, 9, 10)
+# start_date = datetime(2020, 8, 1)
 # end_date = datetime(2020, 9, 13)
-# test_df = crypto_scrape_by_entity(entity, start_date, end_date)
+# test_df = crypto_scrape_by_entity(entity=entity, start_date=start_date, end_date=end_date)
 # print(test_df)
 #################################################
 
