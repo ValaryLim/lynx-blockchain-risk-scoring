@@ -59,7 +59,9 @@ def twitter_scrape_byentity(entity, start_date, end_date):
     df["date_time"] = df["date"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d"))
     df["text"] = df["tweet"]
     df['entity'] = entity
-    df = df[["date_time", "text", "entity", "username", "avatar", "data-item-id", "data-conversation-id"]]
+    df["image_url"] = df["avatar"]
+    df["author"] = df["username"]
+    df = df[["date_time", "text", "entity", "author", "image_url", "data-item-id", "data-conversation-id"]]
 
     # filter only english tweets
     print(df.head())
