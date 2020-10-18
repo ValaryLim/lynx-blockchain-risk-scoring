@@ -9,6 +9,8 @@ scraping/data
 scraping/utils/chromedriver
 scraping/utils/__pycache__
 
+sentiment-analysis/utils/fasttext
+sentiment-analysis/bert
 sentiment-analysis/data
 sentiment-analysis/runs
 sentiment-analysis/wandb
