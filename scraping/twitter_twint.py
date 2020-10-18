@@ -55,7 +55,6 @@ def twitter_scrape_byentity(entity, start_date, end_date):
 
     # process all tweets
     # standardise columns
-    print(df.head())
     df["date_time"] = df["date"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d"))
     df["text"] = df["tweet"]
     df['entity'] = entity
@@ -64,12 +63,10 @@ def twitter_scrape_byentity(entity, start_date, end_date):
     df = df[["date_time", "text", "entity", "author", "image_url", "data-item-id", "data-conversation-id"]]
 
     # filter only english tweets
-    print(df.head())
     mask1 = list(df.apply(lambda x: enTweet(x["text"]), axis=1))
     df = df[mask1]
 
     # filter in and out terms
-    print(df.head())
     mask2 = list(df.apply(lambda x: filter_out(x["text"]), axis=1))
     df = df[mask2]
     mask3 = list(df.apply(lambda x: filter_in(x["text"]), axis=1))
@@ -79,7 +76,6 @@ def twitter_scrape_byentity(entity, start_date, end_date):
     
     # process duplicates
     df = process_duplicates(df)
-    print(df.head())
 
     # reset index
     df = df.reset_index(drop=True)
