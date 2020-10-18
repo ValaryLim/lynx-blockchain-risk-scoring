@@ -4,8 +4,6 @@ import nltk
 from nltk.stem import WordNetLemmatizer 
 
 def filter_entity(sentence, entity):
-    print(sentence, entity)
-    print("----------------")
     return entity.lower() in str(sentence).lower()
 
 def filter_out(sentence):
