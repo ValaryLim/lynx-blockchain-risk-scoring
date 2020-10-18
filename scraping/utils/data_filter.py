@@ -4,8 +4,13 @@ import nltk
 from nltk.stem import WordNetLemmatizer 
 
 def filter_entity(sentence, entity):
-    sentence_list = list(str(sentence).lower().split())
-    return entity.lower() in sentence_list
+    entity_list = entity.split()
+    sentence_list = str(sentence).lower().split()
+    found = 0
+    for entity_word in entity_list:
+        if entity_word in sentence_list:
+            found += 1
+    return found == len(entity_list)
 
 def filter_out(sentence):
     '''
