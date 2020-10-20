@@ -4,16 +4,18 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+import plotly.express as px
 
 import pandas as pd
 from datetime import datetime
 
 # data
 import sys
-sys.path.insert(1, './scraping')
+sys.path.insert(1, '../scraping')
 from main_conventional import conventional_scrape_by_entity
 from main_crypto import crypto_scrape_by_entity
 from reddit import reddit_scrape_byentity
+from twitter_twint import twitter_scrape_byentity
 
 # data processing
 import string 
@@ -24,7 +26,7 @@ from nltk.corpus import stopwords # stopwords
 
 # models
 import fasttext
-sys.path.insert(1, './sentiment-analysis')
+sys.path.insert(1, '../sentiment-analysis')
 from vader import vader_predict
 from word2vec_demo import word2vec_predict
 from simpletransformers.classification import ClassificationModel, ClassificationArgs
@@ -105,6 +107,7 @@ sidebar = html.Div(
 
 #### CONTENT ##################################################################
 content = html.Div([
+    html.Div(id = "graph"),
     html.Div(id="conventional-news"),
     html.Div(id="reddit-news"),
     html.Div(id="twitter-news"),
@@ -132,6 +135,68 @@ def generate_table(name, dataframe, max_rows=10):
             ])
         ])
     ])
+
+
+
+def generate_graph(crypto_df, reddit_df, twitter_df, start_date, end_date):
+    
+    df1 = get_count_by_date(crypto_df, start_date, end_date)
+    df2 = get_count_by_date(reddit_df, start_date, end_date)
+    df3 = get_count_by_date(twitter_df, start_date, end_date)
+
+    print(crypto_df)
+
+    df1['source_type'] = 'crypto'
+    df2['source_type'] = 'reddit'
+    df3['source_type'] = 'twitter'
+
+    result = pd.concat([df1, df2], ignore_index=True, sort=False)
+    result = pd.concat([result, df3], ignore_index=True, sort=False)
+    result['date'] = result['index'].dt.date
+
+    fig = px.line(result, x= 'index', y='label', color='source_type')
+    
+    fig.update_layout(
+        title="Number of posts/articles labelled high-risk over time",
+        title_x=0.5,
+        xaxis_title="Date",
+        yaxis_title="Count",
+        legend_title="Source"
+    )
+    
+    return html.Div(
+        dcc.Graph(
+        id='graph',
+        figure=fig,
+        )
+    )
+
+
+def get_count_by_date(df, start_date, end_date):
+    
+    # Process dataframe
+    # Get datetime format for df date
+    for fmt in ('%Y-%m-%d %H:%M:%S', '%d/%m/%y %H:%M', '%d/%m/%y'):
+        try:
+            df['date'] = pd.to_datetime(df.date_time, format=fmt)
+        except ValueError:
+            pass
+    
+    df['date'] = df['date'].dt.date
+
+    #Group data by date and find the number of posts predicted as risky 
+    df2 = df.groupby(['date']).sum()
+    df = df.drop(['date'], axis = 1)
+
+    #Get all date within range and fill dates with no data with 0 
+    idx = pd.date_range(start_date, end_date)
+    df2.index =  pd.DatetimeIndex(df2.index)
+    df2 = df2.reindex(idx, fill_value=0) 
+
+    df2 = df2.reset_index()
+    return df2
+
+
 
 def pre_processing(text, lemmatize=True, stem=False):
     '''
@@ -175,7 +240,8 @@ def pre_processing(text, lemmatize=True, stem=False):
 
 # when submit button is pressed, run query
 @app.callback(
-    [Output("conventional-news", "children"),
+    [Output("graph", "children"),
+    Output("conventional-news", "children"),
     Output("reddit-news", "children"),
     Output("twitter-news", "children")], 
     [Input("submit", "n_clicks")],
@@ -201,24 +267,38 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
     reddit_df = reddit_scrape_byentity(entity, start_date_datetime, end_date_datetime).reset_index(drop=True)
     reddit_df["text"] = reddit_df["title"].fillna('') + " " + reddit_df["excerpt"].fillna('')
 
+    twitter_df = twitter_scrape_byentity(entity, start_date_datetime, end_date_datetime)
+    twitter_df["text"] = twitter_df["tweet"].fillna('')
+
     # process text for modelling
     crypto_df["text_processed"] = crypto_df["text"].apply(lambda x: pre_processing(x, lemmatize=True, stem=False))
     reddit_df["text_processed"] = reddit_df["text"].apply(lambda x: pre_processing(x, lemmatize=True, stem=False))
+    twitter_df["text_processed"] = twitter_df["text"].apply(lambda x: pre_processing(x, lemmatize=True, stem=False))
 
     # load model
     if model == 'fasttext':
         model_fasttext = fasttext.load_model("./sentiment-analysis/models/fasttext/sample_all_lemmatize.bin")
+
         crypto_df["label"] = crypto_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
         reddit_df["label"] = reddit_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
+        twitter_df["label"] = twitter_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
 
     elif model == 'vader':
         crypto_df["label"] = crypto_df["text"].apply(lambda x: vader_predict(x))
         reddit_df["label"] = reddit_df["text"].apply(lambda x: vader_predict(x))
+        twitter_df["label"] = twitter_df["text"].apply(lambda x: vader_predict(x))
     
     elif model == 'Word2Vec':
+<<<<<<< HEAD
         crypto_df["label"] = crypto_df["text"].apply(lambda x: word2vec_predict(x))
         reddit_df["label"] = reddit_df["text"].apply(lambda x: word2vec_predict(x))
         
+=======
+        crypto_df["label"] = crypto_df["text_processed"].apply(lambda x: word2vec_predict(x))
+        reddit_df["label"] = reddit_df["text_processed"].apply(lambda x: word2vec_predict(x))
+        twitter_df["label"] = twitter_df["text_processed"].apply(lambda x: word2vec_predict(x))
+
+>>>>>>> d09b859804906d1a42d0900cb691494d2eb84e76
     elif model == 'bert':
         # specifying bert model arguments
         model_args = ClassificationArgs(num_train_epochs=2, learning_rate = 5e-5)
@@ -229,12 +309,20 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
         crypto_df["label"] = pred
         pred, raw_outputs = model.predict(reddit_df['text'])
         reddit_df["label"] = pred
+        pred, raw_outputs = model.predict(twitter_df['text'])
+        twitter_df["label"] = pred
+
+    
+    #Rename date to standardise format
+    twitter_df = twitter_df.rename(columns = {"date": "date_time"})
 
     # slice dataframe
-    crypto_df = crypto_df[["date_time", "text", "label"]]
-    reddit_df = reddit_df[["date_time", "text", "label"]]
+    crypto_df = crypto_df[["date_time", "text", "label"]].sort_values('label', ascending = False)
+    reddit_df = reddit_df[["date_time", "text", "label"]].sort_values('label', ascending = False)
+    twitter_df = twitter_df[["date_time", "text", "label"]].sort_values('label', ascending = False)
 
-    return (generate_table("Conventional and Cryptonews", crypto_df),  generate_table("Reddit", reddit_df), None)
+
+    return (generate_graph(crypto_df, reddit_df, twitter_df, str(start_date),str(end_date)), generate_table("Conventional and Cryptonews", crypto_df),  generate_table("Reddit", reddit_df), generate_table("Twitter", twitter_df))
 
 if __name__ == "__main__":
     app.run_server(debug=True, host='127.0.0.1')
