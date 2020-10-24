@@ -5,9 +5,8 @@ from theguardian import theguardian_scrape
 from google1 import google_scrape
 from cryptocontrol import cryptocontrol_scrape
 
-import sys
-sys.path.insert(1, './utils/')
-
+# import sys
+# sys.path.insert(1, './utils/')
 from utils.data_filter import filter_out, filter_entity, process_duplicates
 
 def conventional_scrape_by_entity(entity, start_date, end_date):

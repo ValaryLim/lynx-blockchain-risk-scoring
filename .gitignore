@@ -18,14 +18,10 @@ sentiment-analysis/__pycache__
 sentiment-analysis/cache_dir
 sentiment-analysis/.ipynb_checkpoints
 sentiment-analysis/models
-<<<<<<< HEAD
-sentiment-analysis/__pycache__
-=======
 sentiment-analysis/utils/fasttext/
 
 evaluation/data
 evaluation/.ipynb_checkpoints
->>>>>>> master
 
 .gitsecret/keys/random_seed
 !*.secret
