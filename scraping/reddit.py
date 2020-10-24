@@ -1,8 +1,8 @@
 import pandas as pd
 from psaw import PushshiftAPI
 from datetime import datetime, timedelta
-import sys
-sys.path.insert(1, './utils')
+# import sys
+# sys.path.insert(1, './utils')
 
 from utils.data_filter import filter_in, filter_out, filter_entity, process_duplicates
 
