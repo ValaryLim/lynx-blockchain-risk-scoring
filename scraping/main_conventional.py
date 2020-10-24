@@ -5,9 +5,9 @@ from theguardian import theguardian_scrape
 from google1 import google_scrape
 from cryptocontrol import cryptocontrol_scrape
 
-import sys
-sys.path.insert(1, './utils')
-from data_filter import filter_out
+# import sys
+# sys.path.insert(1, './utils')
+from utils.data_filter import filter_out, filter_entity, process_duplicates
 
 def conventional_scrape_by_entity(entity, start_date, end_date):
     column_names = ["date_time", "title", "excerpt", "domain", \
@@ -38,26 +38,38 @@ def conventional_scrape_by_entity(entity, start_date, end_date):
     else: 
         combined_df = pd.concat([google_df, theguardian_df])
     
-    # filter out irrelevant data
-    combined_df = combined_df[combined_df.apply(lambda x: filter_out(x["title"]) and filter_out(x["excerpt"]), axis=1)]
+    # get text column
+    combined_df["text"] = combined_df["title"].fillna("") + " " + combined_df["excerpt"].fillna("")
     
+    # filter out irrelevant data
+    mask1 = list(combined_df.apply(lambda x: filter_out(x["title"]) and filter_out(x["excerpt"]), axis=1))
+    combined_df = combined_df[mask1]
+    mask2 = list(combined_df.apply(lambda x: filter_entity(str(x["text"]), entity), axis=1))
+    combined_df = combined_df[mask2]
+
+    # label entity and group duplicates
+    combined_df["entity"] = entity
+    combined_df = process_duplicates(combined_df)
+
+    # reset index
+    combined_df = combined_df.reset_index(drop=True)
+
     return combined_df
 
 def conventional_scrape(entity_list, start_date, end_date):
     result_df = pd.DataFrame()
     for i in range(len(entity_list)):
         temp_df = conventional_scrape_by_entity(entity=entity_list[i], start_date=start_date, end_date=end_date)
-        temp_df["entity"] = entity_list[i]
         if i == 0:
             result_df = temp_df
         else:
-            result_df = result_df.merge(temp_df, how="outer")
+            result_df = pd.concat([result_df, temp_df], axis=0)
     
     # drop columns where all rows are nan
     result_df = result_df.dropna(axis=1, how='all')
 
-    # remove duplicates of title, excerpt
-    result_df.drop_duplicates(subset =["title", "excerpt", "entity"], keep = False, inplace = True) 
+    # reset index
+    result_df = result_df.reset_index(drop = True)
 
     return result_df
 
@@ -127,12 +139,11 @@ def combine_samples(positive=[], negative=[]):
 ###################################################
 
 #### UNCOMMENT TO RETRIEVE NEGATIVE TEST CASES ####
-# start_date = datetime(2018, 1, 1, 0, 0, 0)
-# end_date = datetime(2019, 12, 31, 23, 59, 59)
-# entity_list = pd.read_csv("data/entity_list.csv", header=0)["entity"]
-# df = conventional_scrape(entity_list, start_date, end_date)
-# df["label"] = 0
-# df.to_csv("data/conventional_negative_unfiltered.csv")
+start_date = datetime(2020, 1, 1, 0, 0, 0)
+end_date = datetime(2020, 6, 30, 23, 59, 59)
+entity_list = list(pd.read_csv("data/entity_list.csv", header=0)["entity"])
+df = conventional_scrape(entity_list[30:50], start_date, end_date)
+df.to_csv("data/temp.csv")
 ###################################################
 
 #### UNCOMMENT TO COMBINE SAMPLES ####
