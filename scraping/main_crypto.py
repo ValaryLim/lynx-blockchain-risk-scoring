@@ -13,7 +13,12 @@ from nulltx import nulltx_scrape
 
 # import sys
 # sys.path.insert(1, './utils')
-from utils.data_filter import filter_out, filter_entity, process_duplicates
+# from utils.data_filter import filter_out, filter_entity, process_duplicates
+
+import sys
+sys.path.insert(1, '/Users/pengtai.xu/Desktop/Y3S1/Capstone/github/lynx-blockchain-risk-scoring/scraping/utils/')
+
+from data_filter import filter_out, filter_entity, process_duplicates
 
 # means it requires selenium
 

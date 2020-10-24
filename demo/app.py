@@ -29,7 +29,7 @@ import fasttext
 sys.path.insert(1, '../sentiment-analysis')
 from vader import vader_predict
 from word2vec_demo import word2vec_predict
-from simpletransformers.classification import ClassificationModel, ClassificationArgs
+# from simpletransformers.classification import ClassificationModel, ClassificationArgs
 
 # set application
 app = dash.Dash(__name__, external_stylesheets=["assets/datepicker.css", dbc.themes.BOOTSTRAP])
@@ -288,18 +288,18 @@ def render_page_content(n_clicks, entity, model, start_date, end_date):
         reddit_df["label"] = reddit_df["text_processed"].apply(lambda x: word2vec_predict(x))
         twitter_df["label"] = twitter_df["text_processed"].apply(lambda x: word2vec_predict(x))
 
-    elif model == 'bert':
-        # specifying bert model arguments
-        model_args = ClassificationArgs(num_train_epochs=2, learning_rate = 5e-5)
-        # load bert model - change the directory of the bert model respectively
-        model = ClassificationModel(model_type = 'bert', model_name = '../sentiment-analysis/models/bert/outputs_bert_base_cased/', \
-                                    args = model_args, use_cuda = False)
-        pred, raw_outputs = model.predict(crypto_df['text'])
-        crypto_df["label"] = pred
-        pred, raw_outputs = model.predict(reddit_df['text'])
-        reddit_df["label"] = pred
-        pred, raw_outputs = model.predict(twitter_df['text'])
-        twitter_df["label"] = pred
+    # elif model == 'bert':
+    #     # specifying bert model arguments
+    #     model_args = ClassificationArgs(num_train_epochs=2, learning_rate = 5e-5)
+    #     # load bert model - change the directory of the bert model respectively
+    #     model = ClassificationModel(model_type = 'bert', model_name = '../sentiment-analysis/models/bert/outputs_bert_base_cased/', \
+    #                                 args = model_args, use_cuda = False)
+    #     pred, raw_outputs = model.predict(crypto_df['text'])
+    #     crypto_df["label"] = pred
+    #     pred, raw_outputs = model.predict(reddit_df['text'])
+    #     reddit_df["label"] = pred
+    #     pred, raw_outputs = model.predict(twitter_df['text'])
+    #     twitter_df["label"] = pred
 
     
     #Rename date to standardise format
