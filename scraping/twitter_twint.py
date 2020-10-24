@@ -4,7 +4,7 @@ import datetime as dt
 from datetime import datetime
 
 import sys
-sys.path.insert(1, './utils/')
+sys.path.insert(1, './utils')
 from data_filter import filter_in, filter_out, enTweet, filter_entity, process_duplicates
 
 def twitter_scrape_byentity(entity, start_date, end_date):

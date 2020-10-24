@@ -8,7 +8,7 @@ from cryptocontrol import cryptocontrol_scrape
 import sys
 sys.path.insert(1, './utils/')
 
-from data_filter import filter_out, filter_entity, process_duplicates
+from utils.data_filter import filter_out, filter_entity, process_duplicates
 
 def conventional_scrape_by_entity(entity, start_date, end_date):
     column_names = ["date_time", "title", "excerpt", "domain", \
@@ -16,9 +16,9 @@ def conventional_scrape_by_entity(entity, start_date, end_date):
     combined_df = pd.DataFrame(columns = column_names)
 
     # retrieve data
-    google: ['date_time', 'title', 'excerpt', 'domain', 'article_url']
-    theguardian: ["date_time", "title", "excerpt", "article_url"]
-    cryptocontrol: ["date_time", "title", "excerpt", "domain", "article_url", "image_url", "hotness", "activity_hotness"]
+    # google: ['date_time', 'title', 'excerpt', 'domain', 'article_url']
+    # theguardian: ["date_time", "title", "excerpt", "article_url"]
+    # cryptocontrol: ["date_time", "title", "excerpt", "domain", "article_url", "image_url", "hotness", "activity_hotness"]
     google_df = google_scrape(entity, start_date, end_date)
     theguardian_df = theguardian_scrape(entity, start_date, end_date)
     theguardian_df["domain"] = "theguardian"
@@ -36,9 +36,9 @@ def conventional_scrape_by_entity(entity, start_date, end_date):
 
     # combine the dataframes
     if cryptocontrol_scraped:
-        combined_df = pd.concat([cryptocontrol_df, google_df])
+        combined_df = pd.concat([cryptocontrol_df, google_df, theguardian_df])
     else: 
-        combined_df = google_df
+        combined_df = pd.concat([google_df, theguardian_df])
     
     # get text column
     combined_df["text"] = combined_df["title"].fillna("") + " " + combined_df["excerpt"].fillna("")
