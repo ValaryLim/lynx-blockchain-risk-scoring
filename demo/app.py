@@ -187,7 +187,7 @@ def get_count_by_date(df, start_date, end_date):
 
 def render_page_content(n_clicks, entity, start_date, end_date):
     if n_clicks == None:
-        return (None, None, None, None)
+        return (None, None, None, None, None)
 
     # convert start and end date to datetime
     start_date_datetime = datetime.strptime(start_date, "%Y-%m-%d")

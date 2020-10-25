@@ -89,13 +89,13 @@ def crypto_scrape(entity_list, start_date, end_date):
 
     df = pd.DataFrame(columns = column_names)
 
-    i = 0
+    # i = 0
     for entity in entity_list:
-        print(i, entity)
+        # print(i, entity)
         entity_df = crypto_scrape_by_entity(entity, start_date, end_date)
         entity_df['entity'] = entity
         df = df.append(entity_df)
-        i += 1
+        # i += 1
 
     # drop columns where all rows are nan
     df = df.dropna(axis=1, how='all')
