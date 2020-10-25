@@ -21,5 +21,8 @@ sentiment-analysis/models
 sentiment-analysis/utils/fasttext/
 sentiment-analysis/utils/__pycache__/
 
+evaluation/data
+evaluation/.ipynb_checkpoints
+
 .gitsecret/keys/random_seed
 !*.secret

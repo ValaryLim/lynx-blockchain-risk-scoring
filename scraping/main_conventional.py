@@ -6,7 +6,7 @@ from google1 import google_scrape
 from cryptocontrol import cryptocontrol_scrape
 
 # import sys
-# sys.path.insert(1, './utils')
+# sys.path.insert(1, './utils/')
 from utils.data_filter import filter_out, filter_entity, process_duplicates
 
 def conventional_scrape_by_entity(entity, start_date, end_date):
@@ -21,6 +21,7 @@ def conventional_scrape_by_entity(entity, start_date, end_date):
     google_df = google_scrape(entity, start_date, end_date)
     theguardian_df = theguardian_scrape(entity, start_date, end_date)
     theguardian_df["domain"] = "theguardian"
+
 
     cryptocontrol_scraped = False
     try:
@@ -139,11 +140,11 @@ def combine_samples(positive=[], negative=[]):
 ###################################################
 
 #### UNCOMMENT TO RETRIEVE NEGATIVE TEST CASES ####
-start_date = datetime(2020, 1, 1, 0, 0, 0)
-end_date = datetime(2020, 6, 30, 23, 59, 59)
-entity_list = list(pd.read_csv("data/entity_list.csv", header=0)["entity"])
-df = conventional_scrape(entity_list[30:50], start_date, end_date)
-df.to_csv("data/temp.csv")
+# start_date = datetime(2020, 1, 1, 0, 0, 0)
+# end_date = datetime(2020, 6, 30, 23, 59, 59)
+# entity_list = list(pd.read_csv("data/entity_list.csv", header=0)["entity"])
+# df = conventional_scrape(entity_list[30:50], start_date, end_date)
+# df.to_csv("data/temp.csv")
 ###################################################
 
 #### UNCOMMENT TO COMBINE SAMPLES ####
