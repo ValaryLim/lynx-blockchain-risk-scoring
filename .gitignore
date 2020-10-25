@@ -24,5 +24,7 @@ sentiment-analysis/utils/__pycache__/
 evaluation/data
 evaluation/.ipynb_checkpoints
 
+automation/models
+
 .gitsecret/keys/random_seed
 !*.secret
