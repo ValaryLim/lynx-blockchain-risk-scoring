@@ -9,14 +9,22 @@ scraping/data
 scraping/utils/chromedriver
 scraping/utils/__pycache__
 
+sentiment-analysis/utils/fasttext
 sentiment-analysis/bert
 sentiment-analysis/data
 sentiment-analysis/runs
 sentiment-analysis/wandb
+sentiment-analysis/__pycache__
 sentiment-analysis/cache_dir
 sentiment-analysis/.ipynb_checkpoints
 sentiment-analysis/models
-sentiment-analysis/utils
+sentiment-analysis/utils/fasttext/
+sentiment-analysis/utils/__pycache__/
+
+evaluation/data
+evaluation/.ipynb_checkpoints
+
+automation/models
 
 .gitsecret/keys/random_seed
 !*.secret

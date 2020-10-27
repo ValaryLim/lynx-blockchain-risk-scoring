@@ -1,11 +1,17 @@
 import pandas as pd
 from psaw import PushshiftAPI
 from datetime import datetime, timedelta
+# import sys
+# sys.path.insert(1, './utils')
+<<<<<<< HEAD
 import sys
-sys.path.insert(1, './utils')
-from data_filter import filter_in
-from data_filter import filter_out
-#, filter_in
+sys.path.insert(1, '/Users/pengtai.xu/Desktop/Y3S1/Capstone/github/lynx-blockchain-risk-scoring/scraping/utils/')
+
+from data_filter import filter_in, filter_out, filter_entity, process_duplicates
+=======
+
+from utils.data_filter import filter_in, filter_out, filter_entity, process_duplicates
+>>>>>>> 6bf52cb15e1b90324bfcb1973312dcc05d2ccacc
 
 def reddit_scrape_byentity(entity, start_date, end_date):
 
@@ -57,7 +63,6 @@ def reddit_scrape_byentity(entity, start_date, end_date):
         df_submission = df_submission.rename(columns={'selftext': 'excerpt', 'permalink':'article_url'})
 
 
-
     ############################## Comments ################################
 
     #Query and generate the related information
@@ -85,22 +90,29 @@ def reddit_scrape_byentity(entity, start_date, end_date):
         #For comments, there are no titles so the body of the comment will be used as the title
         df_comment = df_comment.rename(columns={'body': 'title', 'permalink':'article_url'})    
 
-
-
-    #Concatenate submissions and comments dataframe
+    # concatenate submissions and comments dataframe
     df = df_submission.append(df_comment)
     df['entity'] = entity
     
-    #Filter the data with relevant keywords
     df = df.fillna('')
-    df = df[df.apply(lambda x: filter_in(x["title"]) or filter_in(x["excerpt"]), axis=1)]
-    df = df[df.apply(lambda x: filter_out(x["title"]) and filter_out(x["excerpt"]), axis=1)]
+    df["text"] = df["title"] + " " + df["excerpt"]
 
+    # filter out irrelevant data
+    mask1 = list(df.apply(lambda x: filter_out(x["title"]) and filter_out(x["excerpt"]), axis=1))
+    df = df[mask1]
+    mask2 = list(df.apply(lambda x: filter_in(x["title"]) or filter_in(x["excerpt"]), axis=1))
+    df = df[mask2]
+    mask3 = list(df.apply(lambda x: filter_entity(str(x["text"]), entity), axis=1))
+    df = df[mask3]
 
-    #Output dataframe columns: [author, title, article_url, date_time, subreddit, excerpt]
+    # process duplicates
+    df = process_duplicates(df)
+
+    # reset index
+    df = df.reset_index(drop=True)
+
+    #Output dataframe columns: [author, title, article_url, date_time, subreddit, excerpt, text, date_time_all]
     return df
-
-
 
 
 def reddit_scrape(entity_list, start, end):
@@ -116,6 +128,13 @@ def reddit_scrape(entity_list, start, end):
         #Join the dataframes by column
         output_df = output_df.append(df)
 
+    # reset index
+    output_df = output_df.reset_index(drop=True)
+
     return output_df
 
-
+# entity = 'binance'
+# start_date = datetime(2020, 1, 2)
+# end_date = datetime(2020, 1, 15)
+# df = reddit_scrape_byentity(entity, start_date, end_date)
+# print(df)
