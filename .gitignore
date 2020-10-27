@@ -29,7 +29,7 @@ automation/models
 automation/__pycache__
 automation/utils/data
 automation/utils/__pycache__
-automation/.db
+automation/lynx_data.db
 
 .gitsecret/keys/random_seed
 !*.secret
