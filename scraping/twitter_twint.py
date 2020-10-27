@@ -3,11 +3,12 @@ import pandas as pd
 import datetime as dt
 from datetime import datetime
 
-import sys
-sys.path.insert(1, './utils')
-from data_filter import filter_in, filter_out, enTweet, filter_entity, process_duplicates
+# import sys
+# sys.path.insert(1, './utils')
+from utils.data_filter import filter_in, filter_out, enTweet, filter_entity, process_duplicates
+from utils.get_coins import get_coins
 
-def twitter_scrape_byentity(entity, start_date, end_date):
+def twitter_scrape_by_entity(entity, start_date, end_date):
     c = twint.Config() 
     c.Search = entity 
     c.Limit = 100 #max 100 per entity per month
@@ -29,7 +30,6 @@ def twitter_scrape_byentity(entity, start_date, end_date):
         df = pd.DataFrame.from_dict(tlist) 
 
     else:
-
         #scrap by month to ensure a good disrtibution of tweets
         for i in range(months):
 
@@ -53,6 +53,9 @@ def twitter_scrape_byentity(entity, start_date, end_date):
             cDf = pd.DataFrame.from_dict(curTlist)
             df = df.append(cDf)
 
+            print(df)
+
+
     # process all tweets
     # standardise columns
     df["date_time"] = df["date"].apply(lambda x: datetime.strptime(x, "%Y-%m-%d"))
@@ -60,7 +63,8 @@ def twitter_scrape_byentity(entity, start_date, end_date):
     df['entity'] = entity
     df["image_url"] = df["avatar"]
     df["author"] = df["username"]
-    df = df[["date_time", "text", "entity", "author", "image_url", "data-item-id", "data-conversation-id"]]
+    df['coin'] = df['text'].apply(lambda x: get_coins(x))
+    df = df[["date_time", "text", "entity", "author", "image_url", "data-item-id", "data-conversation-id", "coin"]]
 
     # filter only english tweets
     mask1 = list(df.apply(lambda x: enTweet(x["text"]), axis=1))
@@ -89,19 +93,23 @@ def twitter_scrape(entity_list, start, end):
     #Iterate through list of entities
     for entity in entity_list:
         #retrieve dataframe consisting of all data for each entity
-        df = twitter_scrape_byentity(entity, start, end)
+        df = twitter_scrape_by_entity(entity, start, end)
 
         #Join the dataframes by column
         output_df = output_df.append(df)
 
     # reset index
     output_df = output_df.reset_index(drop=True)
+    output_df['source'] = 'twitter'
+    output_df = output_df.rename({'data-item-id':'sourceID','text':'content', 'domain':'source', \
+                            'date_time':'article_date','image_url':'img_link',}, axis = 1)
 
     return output_df
 
 
-# entity = 'binance'
-# start_date = datetime(2020, 1, 2)
-# end_date = datetime(2020, 10, 15)
-# df = twitter_scrape_byentity(entity, start_date, end_date)
+# entity = 'okex'
+# start_date = datetime(2020, 9, 1)
+# end_date = datetime(2020, 10, 26)
+# df = twitter_scrape_by_entity(entity, start_date, end_date)
 # print(df)
+
