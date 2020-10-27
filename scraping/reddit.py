@@ -5,8 +5,9 @@ from datetime import datetime, timedelta
 # sys.path.insert(1, './utils')
 
 from utils.data_filter import filter_in, filter_out, filter_entity, process_duplicates
+from utils.get_coins import get_coins
 
-def reddit_scrape_byentity(entity, start_date, end_date):
+def reddit_scrape_by_entity(entity, start_date, end_date):
 
     api = PushshiftAPI()
 
@@ -84,7 +85,11 @@ def reddit_scrape_byentity(entity, start_date, end_date):
         df_comment = df_comment.rename(columns={'body': 'title', 'permalink':'article_url'})    
 
     # concatenate submissions and comments dataframe
-    df = df_submission.append(df_comment)
+    # concatenate submissions and comments dataframe
+    df = pd.DataFrame(columns = ['author', 'article_url', 'excerpt', 'subreddit','title', 'date_time','type','entity'])
+    df = df.append(df_submission)
+    df = df.append(df_comment)
+    
     df['entity'] = entity
     
     df = df.fillna('')
@@ -101,6 +106,9 @@ def reddit_scrape_byentity(entity, start_date, end_date):
     # process duplicates
     df = process_duplicates(df)
 
+    # find all coins that are relevant in text
+    df['coin'] = df['text'].apply(lambda x: get_coins(x))
+
     # reset index
     df = df.reset_index(drop=True)
 
@@ -114,15 +122,19 @@ def reddit_scrape(entity_list, start, end):
 
     #Iterate through list of entities
     for entity in entity_list:
-
+        
         #retrieve dataframe consisting of all data for each entity
-        df = reddit_scrape_byentity(entity, start, end)
+        df = reddit_scrape_by_entity(entity, start, end)
 
         #Join the dataframes by column
         output_df = output_df.append(df)
 
     # reset index
     output_df = output_df.reset_index(drop=True)
+    
+    output_df['source'] = 'reddit'
+    output_df = output_df.rename({'text':'content', 'article_url':'url', 'date_time':'article_date',\
+                            'image_url':'img_link'}, axis = 1)
 
     return output_df
 
