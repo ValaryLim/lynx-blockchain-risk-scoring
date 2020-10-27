@@ -3,11 +3,11 @@ from datetime import datetime
 from bitcoin import bitcoin_scrape
 from bitcoinist import bitcoinist_scrape #
 from bitnewstoday import bitnewstoday_scrape
-from coindesk import coindesk_scrape #
-from cointelegraph import cointelegraph_scrape #
+from coindesk import coindesk_scrape
+from cointelegraph import cointelegraph_scrape
 from cryptonews import cryptonews_scrape #
 from cryptoslate import cryptoslate_scrape #
-from forbes import forbes_scrape #
+from forbes import forbes_scrape
 from insidebitcoins import insidebitcoins_scrape
 from nulltx import nulltx_scrape
 
@@ -41,18 +41,20 @@ def crypto_scrape_by_entity(entity, start_date, end_date):
 
     # retrieve from sites that require selenium
     # only for recent articles
-    if time_delta <= 31:
-        # removed: bitcoinist_scrape, 
-        functions_lst = [bitcoin_scrape, \
-                        bitnewstoday_scrape, coindesk_scrape, \
-                        cointelegraph_scrape, cryptonews_scrape, \
-                        cryptoslate_scrape, forbes_scrape, \
-                        insidebitcoins_scrape, nulltx_scrape]
+    # if time_delta <= 31:
+    #     # removed: bitcoinist_scrape, 
+    #     functions_lst = [bitcoin_scrape, \
+    #                     bitnewstoday_scrape, coindesk_scrape, \
+    #                     cointelegraph_scrape, cryptonews_scrape, \
+    #                     cryptoslate_scrape, forbes_scrape, \
+    #                     insidebitcoins_scrape, nulltx_scrape]
 
     # else, scrape only sites that use BeautifulSoup                   
-    else:
-        functions_lst = [bitcoin_scrape, bitnewstoday_scrape, \
-                         insidebitcoins_scrape, nulltx_scrape]
+    #else:
+    functions_lst = [bitcoin_scrape, bitnewstoday_scrape, \
+                     insidebitcoins_scrape, nulltx_scrape, \
+                     cointelegraph_scrape, coindesk_scrape, \
+                     forbes_scrape]
 
 
     for f in functions_lst:
@@ -105,14 +107,13 @@ def crypto_scrape(entity_list, start_date, end_date):
     return df
 
 
-#### TESTING CRYPTO SCRAPE BY ENTITY FUNCTION ###
+# #### TESTING CRYPTO SCRAPE BY ENTITY FUNCTION ###
 # entity = 'binance'
-# start_date = datetime(2020, 8, 1)
-# end_date = datetime(2020, 9, 13)
+# start_date = datetime(2020, 9, 1)
+# end_date = datetime(2020, 10, 25)
 # test_df = crypto_scrape_by_entity(entity=entity, start_date=start_date, end_date=end_date)
 # print(test_df)
-#################################################
-
+# #################################################
 
 #### TESTING CRYPTO SCRAPE FUNCTION ###
 # entity_list = list(pd.read_csv("data/entity_list.csv")['entity'])
