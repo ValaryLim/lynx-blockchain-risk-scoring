@@ -5,10 +5,9 @@ from theguardian import theguardian_scrape
 from google1 import google_scrape
 from cryptocontrol import cryptocontrol_scrape
 
-import sys
-sys.path.insert(1, '/Users/pengtai.xu/Desktop/Y3S1/Capstone/github/lynx-blockchain-risk-scoring/scraping/utils/')
-
-from data_filter import filter_out, filter_entity, process_duplicates
+# import sys
+# sys.path.insert(1, './utils/')
+from utils.data_filter import filter_out, filter_entity, process_duplicates
 
 def conventional_scrape_by_entity(entity, start_date, end_date):
     column_names = ["date_time", "title", "excerpt", "domain", \
@@ -22,6 +21,7 @@ def conventional_scrape_by_entity(entity, start_date, end_date):
     google_df = google_scrape(entity, start_date, end_date)
     theguardian_df = theguardian_scrape(entity, start_date, end_date)
     theguardian_df["domain"] = "theguardian"
+
 
     cryptocontrol_scraped = False
     try:

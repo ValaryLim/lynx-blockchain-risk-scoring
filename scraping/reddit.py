@@ -3,10 +3,15 @@ from psaw import PushshiftAPI
 from datetime import datetime, timedelta
 # import sys
 # sys.path.insert(1, './utils')
+<<<<<<< HEAD
 import sys
 sys.path.insert(1, '/Users/pengtai.xu/Desktop/Y3S1/Capstone/github/lynx-blockchain-risk-scoring/scraping/utils/')
 
 from data_filter import filter_in, filter_out, filter_entity, process_duplicates
+=======
+
+from utils.data_filter import filter_in, filter_out, filter_entity, process_duplicates
+>>>>>>> 6bf52cb15e1b90324bfcb1973312dcc05d2ccacc
 
 def reddit_scrape_byentity(entity, start_date, end_date):
 
