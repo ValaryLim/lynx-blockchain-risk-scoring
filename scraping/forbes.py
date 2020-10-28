@@ -20,6 +20,7 @@ def forbes_scrape(entity, start_date, end_date):
 
         url = 'https://www.forbes.com/simple-data/search/more/?start=' + str(start_page) + '&sort=recent&q=' + entity
         page = requests.get(url).text
+        print(page)
         soup = BeautifulSoup(page, 'html.parser')
         
         results = soup.find_all('article')
@@ -66,8 +67,8 @@ def forbes_scrape(entity, start_date, end_date):
 
 
 ###############Testing################
-# entity = 'binance'
-# start_date = datetime(2020,6, 3)
-# end_date = datetime(2020,8, 30, 23, 59, 59)
-# df = forbes_scrape(entity, start_date, end_date)
+entity = 'binance'
+start_date = datetime(2020, 10, 1)
+end_date = datetime(2020, 10, 25)
+df = forbes_scrape(entity, start_date, end_date)
 ######################################

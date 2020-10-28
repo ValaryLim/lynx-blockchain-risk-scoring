@@ -1,93 +1,90 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
 from bs4 import BeautifulSoup
+import requests
 from datetime import datetime
 import pandas as pd
-import time
+import numpy as np
+import json
 
-def cryptonews_scrape(entity, start_date, end_date): 
-    # remove notifications
-    chrome_options = webdriver.ChromeOptions()
-    prefs = {"profile.default_content_setting_values.notifications" : 2}
-    chrome_options.add_experimental_option("prefs", prefs)
+def cryptonews_scrape(entity, start_date, end_date):  
+    #Remove all ' ' characters in url
+    entity = entity.replace(' ','+')
+
+    #Store data
+    data = {'date_time':[], 'title':[], 'excerpt':[], 'article_url':[], 'image_url':[], 'author':[], 'author_url':[]}
     
-    # create driver
-    driver = webdriver.Chrome('../scraping/utils/chromedriver', options=chrome_options)
 
-    entity_name = entity.replace(" ", "+")
+    #Get the html data using the post method
+    def retrieve_data(entity, offset_num):
 
-    # search for webpage
-    search = "https://cryptonews.com/search/articles.htm?q=" + entity_name
-    driver.get(search)
+        #Link to retrieve data from
+        r = requests.post("https://cryptonews.com/search/", json=json.dumps(dict(
+        q=entity, # checked on this, the entity filtering is working fine
+        event= 'sys.search#morepages',
+        where= 'YToyOntpOjA7czo4OiJhcnRpY2xlcyI7aToxO3M6NzoiYmluYW5jZSI7fQ==',
+        offset= offset_num, # +48 each time.  NOT WORKING
+        articles_type='undefined',
+        pages = 3, 
+        )), headers={'User-Agent': 'Mozilla/5.0'})
 
-    # preliminary search of all articles
-    articles = driver.find_elements_by_xpath("//div[@class='cn-tile article']")
+        page = r.text
+        soup = BeautifulSoup(page, 'html.parser')
+        results = soup.find_all("div", {"class": "cn-tile article"})
+        return results
 
-    column_names = ["date_time", "title", "category", "article_url"]
-    df = pd.DataFrame(columns = column_names)
+    offset_num = 0
+    page_data = retrieve_data(entity, offset_num)
 
-    if len(articles) > 0:
+    #The last variable tracks the date_time of most recent article retrieved
+    last = end_date
 
-        soup = BeautifulSoup(articles[-1].get_attribute("innerHTML"), features="html.parser")
+    while last >= start_date:    
+        #print(results)
 
-        # time
-        date_string = soup.find("time")["datetime"][:-6]
-        date_time = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S")
+        if page_data == []:
+            break
+        else:
+            for article in page_data:
 
-        # keep pressing load more button until reach start date
-        current_date = date_time
-        while current_date >= start_date:
-            try:
-                # refind load button and press
-                load_more_section = driver.find_element_by_xpath("//div[@class='cn-section-controls']")
-                load_more_button = load_more_section.find_element_by_tag_name("a")
-                action = ActionChains(driver)
-                action.move_to_element(load_more_button).click(load_more_button).perform()
-                time.sleep(3)
-            except:
-                # no more load more button
-                pass
-                break
+                #Get the date of the article
+                date_string = article.find("time")["datetime"][:-6]
+                date_time = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S") 
+                print("datetime of article ", date_time)
 
-            # retrieve articles again
-            articles = driver.find_elements_by_xpath("//div[@class='cn-tile article']")
-            soup = BeautifulSoup(articles[-1].get_attribute("innerHTML"), features="html.parser")
+                last = date_time # update current date
+            
+                if date_time <= end_date and date_time >= start_date:
+                    ## Store info in dataframe if it lies in the date range
+                    data['date_time'].append(date_time)
 
-            # retrieve earliest date
-            date_string = soup.find("time")["datetime"][:-6]
-            date_time = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S")
+                    # retrieve url and text
+                    article_module = article.find("h4")
+                    article_url = "https://cryptonews.com" + article_module.find("a")["href"]
+                    title_text = article_module.text
+                    data['title'].append(title_text)
+                    print("title of article ", title_text)
+                    data['excerpt'].append("")
+                    data['article_url'].append(article_url)
 
-            current_date = date_time
+                    # retrieve img url
+                    img_url = article.find("img")["src"]
+                    data['image_url'].append(img_url)
 
-        # retrieve details from all articles
-        for article in articles: 
-            soup = BeautifulSoup(article.get_attribute("innerHTML"), features="html.parser")
+                    # no author info
+                    data['author'].append("")
+                    data['author_url'].append("")
+        
+            print("=============================")
+            print("current offset ",  offset_num)
+            #print(data['title'])
+            offset_num += 48 #referred to inspect on chrome
+            page_data = retrieve_data(entity, offset_num)
 
-            # retrieve date
-            date_string = soup.find("time")["datetime"][:-6]
-            date_time = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S")
-
-            if date_time > end_date:
-                continue
-
-            # retrieve url and text
-            article_module = soup.find("h4")
-            article_url = "https://cryptonews.com" + article_module.find("a")["href"]
-            title_text = article_module.text
-
-            # retrieve category
-            category = soup.find("span", class_='notch').find("a").text
-
-            # add information to dataframe
-            df = df.append({"date_time": date_time, "title": title_text, \
-                "category": category, "article_url": article_url}, ignore_index=True)
-
-    driver.quit()
+    df = pd.DataFrame(data)
     return df
 
-# entity = "Forsage.io"
-# start_date = datetime(2020, 7, 17)
-# end_date = datetime(2020, 8, 10)
-# df = cryptonews_scrape(entity, start_date, end_date)
-# print(df)
+# ###############Testing################
+entity = 'binance'
+start_date = datetime(2020, 10, 1)
+end_date = datetime(2020, 10, 28)
+df = cryptonews_scrape(entity, start_date, end_date)
+# ######################################
