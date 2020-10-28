@@ -14,6 +14,7 @@ from nulltx import nulltx_scrape
 # import sys
 # sys.path.insert(1, './utils')
 from utils.data_filter import filter_out, filter_entity, process_duplicates
+from utils.get_coins import get_coins
 
 # means it requires selenium
 
@@ -29,7 +30,7 @@ def crypto_scrape_by_entity(entity, start_date, end_date):
     # create output dataframe
     column_names = ['domain', 'date_time', 'title', 'excerpt', \
                     'article_url', 'image_url', 'author', 'author_url', \
-                    'category']
+                    'category','coin']
 
     df = pd.DataFrame(columns = column_names)
 
@@ -76,6 +77,9 @@ def crypto_scrape_by_entity(entity, start_date, end_date):
     df["entity"] = entity
     df = process_duplicates(df)
 
+    # get coins that are relevant in text 
+    df['coin'] = df['text'].apply(lambda x: get_coins(x))
+
     # reset index
     df = df.reset_index(drop=True)
 
@@ -87,7 +91,7 @@ def crypto_scrape_by_entity(entity, start_date, end_date):
 def crypto_scrape(entity_list, start_date, end_date):
     column_names = ['domain', 'entity', 'date_time', 'title', 'excerpt', \
                     'article_url', 'image_url', 'author', 'author_url', \
-                    'category']
+                    'category', 'coin']
 
     df = pd.DataFrame(columns = column_names)
 
@@ -104,6 +108,9 @@ def crypto_scrape(entity_list, start_date, end_date):
 
     # reset index
     df = df.reset_index(drop = True)
+
+    df = df.rename({'text':'content', 'article_url':'url', 'domain':'source', \
+                                'date_time':'article_date', 'image_url':'img_link'}, axis = 1)
     return df
 
 
