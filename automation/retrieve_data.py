@@ -9,10 +9,10 @@ from model_predict import model_predict
 #Import all scrapers
 import sys
 sys.path.insert(1, '../scraping')
-from main_conventional import conventional_scrape_by_entity
-from main_crypto import crypto_scrape_by_entity
-from reddit import reddit_scrape_by_entity
-from twitter_twint import twitter_scrape_by_entity
+from main_conventional import conventional_scrape
+from main_crypto import crypto_scrape
+from reddit import reddit_scrape
+from twitter_twint import twitter_scrape
 
 
 
