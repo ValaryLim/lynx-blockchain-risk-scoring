@@ -14,7 +14,7 @@ def entity_risk_score(df):
             pass
 
     df['date'] = df['date'].dt.date
-    df = df[['entity', 'date', 'probability_risk']]
+    df = df[['entity', 'date', 'probability_risk', 'count']]
 
     df2 =  df.groupby(['entity','date']).agg("mean")
     df2.reset_index(level=0, inplace=True)

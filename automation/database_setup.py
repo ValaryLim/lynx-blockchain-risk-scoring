@@ -1,5 +1,10 @@
 import sqlite3
 
+'''
+Set up sqlite database for storage of retrieved data
+'''
+
+
 conn = sqlite3.connect(r"../automation/lynx_data.db")
 c = conn.cursor()
 

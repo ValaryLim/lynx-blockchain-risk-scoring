@@ -1,12 +1,12 @@
 import pandas as pd
 from datetime import datetime
 from bitcoin import bitcoin_scrape
-#from bitcoinist import bitcoinist_scrape #
+from bitcoinist import bitcoinist_scrape #
 from bitnewstoday import bitnewstoday_scrape
 from coindesk import coindesk_scrape
 from cointelegraph import cointelegraph_scrape
-#from cryptonews import cryptonews_scrape #
-#from cryptoslate import cryptoslate_scrape #
+from cryptonews import cryptonews_scrape #
+from cryptoslate import cryptoslate_scrape #
 from forbes import forbes_scrape
 from insidebitcoins import insidebitcoins_scrape
 from nulltx import nulltx_scrape

@@ -10,14 +10,27 @@ from entity_risk_score import entity_risk_score
 
 
 def get_data(entity_list, start_date, end_date):
+    '''
+
+    Input:
+        entity_list (list):
+        start_date (datetime):
+        end_date (datetime):
+    '''
 
     #Connect to database
     conn = sqlite3.connect('lynx_data.db')
     c = conn.cursor()
 
     # Retrieve data from web scraping and store in database
-    df = retrieve_data(entity_list, start_date, end_date)
-    df.to_csv(r'~/Desktop/test.csv', index = False)
+    for entity:
+        df = retrieve_data(entity_list, start_date, end_date)
+        score = 
+        score["entity"] = entity
+    # df = retrieve_data(entity, start, end)
+    
+    
+    #df.to_csv(r'~/Desktop/test.csv', index = False)
 
     #Append data into table
     df.to_sql('POST_DATA', conn, if_exists='append', index = False)
@@ -31,7 +44,7 @@ def get_data(entity_list, start_date, end_date):
 
 
 ############# Testing #############
-# get_data(['binance','bitfinex', 'huobi', 'okex', 'upbit'], datetime(2020,9,1), datetime(2020,10,26))
+get_data(['binance','bitfinex', 'huobi', 'okex', 'upbit'], datetime(2020,9,1), datetime(2020,10,26))
 ###################################
 
 
