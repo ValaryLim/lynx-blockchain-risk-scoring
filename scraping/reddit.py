@@ -112,7 +112,12 @@ def reddit_scrape_by_entity(entity, start_date, end_date):
     # reset index
     df = df.reset_index(drop=True)
 
-    #Output dataframe columns: [author, title, article_url, date_time, subreddit, excerpt, text, date_time_all]
+    # add source column
+    df['source'] = 'reddit'
+
+    # rename columns to standardise with database schema
+    df = df.rename({'text':'content', 'article_url':'url', 'date_time':'article_date',}, axis = 1)
+
     return df
 
 
@@ -132,14 +137,10 @@ def reddit_scrape(entity_list, start, end):
     # reset index
     output_df = output_df.reset_index(drop=True)
     
-    output_df['source'] = 'reddit'
-    output_df = output_df.rename({'text':'content', 'article_url':'url', 'date_time':'article_date',\
-                            'image_url':'img_link'}, axis = 1)
-
     return output_df
 
-# entity = 'binance'
-# start_date = datetime(2020, 1, 2)
-# end_date = datetime(2020, 1, 15)
-# df = reddit_scrape_byentity(entity, start_date, end_date)
-# print(df)
+# entity = ['okex', 'huobi']
+# start_date = datetime(2020, 10, 15)
+# end_date = datetime(2020, 10, 26, 23, 59, 59)
+# df = reddit_scrape(entity, start_date, end_date)
+# df.to_csv(r'~/Desktop/reddit_sample.csv', index = False)

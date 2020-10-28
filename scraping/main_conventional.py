@@ -59,6 +59,9 @@ def conventional_scrape_by_entity(entity, start_date, end_date):
     # reset index
     combined_df = combined_df.reset_index(drop=True)
 
+    combined_df = combined_df.rename({'text':'content', 'article_url':'url', 'domain':'source', \
+                                    'date_time':'article_date'}, axis = 1)
+
     return combined_df
 
 def conventional_scrape(entity_list, start_date, end_date):
@@ -76,8 +79,6 @@ def conventional_scrape(entity_list, start_date, end_date):
     # reset index
     result_df = result_df.reset_index(drop = True)
 
-    result_df = result_df.rename({'text':'content', 'article_url':'url', 'domain':'source', 'date_time':'article_date'},\
-                        axis = 1)
     return result_df
 
 def retrieve_cases(file, time_frame=7):

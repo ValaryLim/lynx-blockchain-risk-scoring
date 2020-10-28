@@ -16,7 +16,6 @@ from nulltx import nulltx_scrape
 from utils.data_filter import filter_out, filter_entity, process_duplicates
 from utils.get_coins import get_coins
 
-# means it requires selenium
 
 # the following are excluded because articles are not sorted by date
 # # from newsbtc import newsbtc_scrape
@@ -34,24 +33,7 @@ def crypto_scrape_by_entity(entity, start_date, end_date):
 
     df = pd.DataFrame(columns = column_names)
 
-    # check current date
-    today = datetime.now()
 
-    # time difference
-    time_delta = (today - start_date).days
-
-    # retrieve from sites that require selenium
-    # only for recent articles
-    # if time_delta <= 31:
-    #     # removed: bitcoinist_scrape, 
-    #     functions_lst = [bitcoin_scrape, \
-    #                     bitnewstoday_scrape, coindesk_scrape, \
-    #                     cointelegraph_scrape, cryptonews_scrape, \
-    #                     cryptoslate_scrape, forbes_scrape, \
-    #                     insidebitcoins_scrape, nulltx_scrape]
-
-    # else, scrape only sites that use BeautifulSoup                   
-    #else:
     functions_lst = [bitcoin_scrape, bitnewstoday_scrape, \
                      insidebitcoins_scrape, nulltx_scrape, \
                      cointelegraph_scrape, coindesk_scrape, \
@@ -83,6 +65,11 @@ def crypto_scrape_by_entity(entity, start_date, end_date):
     # reset index
     df = df.reset_index(drop=True)
 
+    df = df.rename({'text':'content', 'article_url':'url', 'domain':'source', \
+                    'date_time':'article_date', 'image_url':'img_link'}, axis = 1)
+
+    print(df.dtypes)
+                    
     return df
 
 
@@ -109,8 +96,6 @@ def crypto_scrape(entity_list, start_date, end_date):
     # reset index
     df = df.reset_index(drop = True)
 
-    df = df.rename({'text':'content', 'article_url':'url', 'domain':'source', \
-                                'date_time':'article_date', 'image_url':'img_link'}, axis = 1)
     return df
 
 
@@ -127,4 +112,11 @@ def crypto_scrape(entity_list, start_date, end_date):
 # start_date = datetime(2020, 1, 1)
 # end_date = datetime(2020, 6, 30, 23, 59, 59)
 # data = crypto_scrape(entity_list, start_date, end_date)
+#################################################
+
+#### TESTING CRYPTO SCRAPE FUNCTION ###
+#entity_list = list(pd.read_csv("data/entity_list.csv")['entity'])
+# start_date = datetime(2020, 10, 10)
+# end_date = datetime(2020, 10, 25, 23, 59, 59)
+# df = crypto_scrape_by_entity('huobi', start_date, end_date)
 #################################################
