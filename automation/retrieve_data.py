@@ -9,10 +9,10 @@ from model_predict import model_predict
 #Import all scrapers
 import sys
 sys.path.insert(1, '../scraping')
-from main_conventional import conventional_scrape_by_entity
-from main_crypto import crypto_scrape_by_entity
-from reddit import reddit_scrape_by_entity
-from twitter_twint import twitter_scrape_by_entity
+from main_conventional import conventional_scrape
+from main_crypto import crypto_scrape
+from reddit import reddit_scrape
+from twitter_twint import twitter_scrape
 
 
 
@@ -53,13 +53,13 @@ def retrieve_data(entity_list, start_date, end_date):
     #Twitter scraping
     twitter_df = twitter_scrape(entity_list, start_date, end_date)
     if list(twitter_df.columns.values) != []:
-        twitter_df = twitter_df[['sourceID', 'source','article_date','content','count','entity','author','coin']]
+        twitter_df = twitter_df[['source_id', 'source','article_date','content','count','entity','author','coin']]
 
     print('scraping done...')
 
 
     #Create dataframe consisting of all required columns 
-    df = pd.DataFrame(columns = ['uid', 'sourceID', 'source','article_date','content', 'url','count','img_link',\
+    df = pd.DataFrame(columns = ['uid', 'source_id', 'source','article_date','content', 'url','count','img_link',\
         'entity','author','ground_truth_risk','probability_risk','predicted_risk','coin'])
 
     df = df.append(conv_df)
