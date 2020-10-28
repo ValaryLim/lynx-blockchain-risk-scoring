@@ -35,7 +35,7 @@ def reddit_scrape_by_entity(entity, start_date, end_date):
     
     #Query and generate the related information
     gen_submission = api.search_submissions(q=entity,after= start_epoch, before = end_epoch,
-            filter=['created_utc', 'title', 'selftext', 'permalink', 'author', 'subreddit'],
+            filter=['created_utc', 'title', 'selftext', 'permalink', 'author', 'subreddit', 'id'],
             subreddit = subreddits)
 
     #Generate dataframe for required data
@@ -61,7 +61,7 @@ def reddit_scrape_by_entity(entity, start_date, end_date):
 
     #Query and generate the related information
     gen_comments = api.search_comments(q=entity,after= start_epoch, before = end_epoch,
-            filter=['created_utc', 'body', 'permalink', 'author', 'subreddit'],
+            filter=['created_utc', 'body', 'permalink', 'author', 'subreddit', 'id'],
             subreddit = subreddits)
 
 
@@ -77,6 +77,7 @@ def reddit_scrape_by_entity(entity, start_date, end_date):
         df_comment['subreddit'] = df_comment['subreddit'].apply(lambda x: x.lower())
         df_comment['excerpt'] = ''
         df_comment['type'] = 'comments'
+        df_comment['id'] = 'comments/' + df_comment['id']
 
         #Remove unecessary columns of data
         df_comment = df_comment.drop(columns = ['created_utc','created'])
@@ -116,7 +117,7 @@ def reddit_scrape_by_entity(entity, start_date, end_date):
     df['source'] = 'reddit'
 
     # rename columns to standardise with database schema
-    df = df.rename({'text':'content', 'article_url':'url', 'date_time':'article_date',}, axis = 1)
+    df = df.rename({'text':'content', 'article_url':'url', 'date_time':'article_date','id':'source_id'}, axis = 1)
 
     return df
 
