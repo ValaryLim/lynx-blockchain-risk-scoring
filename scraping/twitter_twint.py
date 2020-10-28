@@ -61,11 +61,11 @@ def get_tweet(config):
     return tlist
 
 
-entity = 'okex'
-start_date = datetime(2020, 10, 15)
-end_date = datetime(2020, 10, 27)
-df = twitter_scrape_byentity(entity, start_date, end_date)
-df.to_csv(r'~/Desktop/test_twitter.csv')
+# entity = 'okex'
+# start_date = datetime(2020, 10, 15)
+# end_date = datetime(2020, 10, 27)
+# df = twitter_scrape_byentity(entity, start_date, end_date)
+# df.to_csv(r'~/Desktop/test_twitter.csv')
 
 ## 2020
 # entities = pd.read_csv('./entity_list.csv').entity.tolist()

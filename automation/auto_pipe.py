@@ -63,7 +63,7 @@ def train(filepath):
         SELECT * FROM POST_DATA
         ''')
 
-    df = pd.DataFrame(c.fetchall(), columns = ['uid', 'sourceID', 'source','article_date','content', 'url', 'count',\
+    df = pd.DataFrame(c.fetchall(), columns = ['uid', 'source_id', 'source','article_date','content', 'url', 'count',\
                     'img_link','entity','author','ground_truth_risk','probability_risk','predicted_risk','coin'])  
     
     #Retrain model
