@@ -3,6 +3,7 @@ import dash
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table
 from dash.dependencies import Input, Output, State
 import plotly.express as px
 
@@ -56,6 +57,7 @@ sidebar = html.Div(
 
 #### CONTENT ##################################################################
 # entity input
+'''
 entity_input = html.Div([
     dbc.Label("Entity Name", className="p", style={"font-weight": "600"}),
     html.Br(),
@@ -63,6 +65,25 @@ entity_input = html.Div([
         type="text", bs_size="md", className="mb-3", \
             style={"font-size": "14px"})
 ], style={'width': '20%', 'display': 'inline-block', 'margin-right': 250})
+'''
+# retrieve entity list
+entity_list = list(pd.read_csv('../sentiment-analysis/data/entity_list.csv').entity)
+entity_list.sort() # sort in alphabetical order
+
+entity_input = html.Div([
+    dbc.Label("Entity Name", className="p", style={"font-weight": "600"}),
+    html.Br(),
+    dcc.Dropdown(
+        id='entity-input',
+        placeholder="Select entity name here", 
+        options=[
+            {'label': entity, 'value': entity} for entity in entity_list
+        ],
+        style={"font-size": "14px"}, 
+        className="mb-3"
+    ),
+    html.Div(id='dd-output-container')
+], style={'width': '40%', 'display': 'inline-block', 'margin-right': 100})
 
 # date input
 date_input = html.Div([
@@ -112,6 +133,8 @@ def generate_table(name, dataframe, max_rows=10):
     generate table dynamically from dataframe
     '''
     return html.Div([html.H5(name),
+        dbc.Label(f"Total Articles Retrieved: {len(dataframe)}", 
+                    style={"font-weight": "600", "font-size": "14px"}),
         dbc.Table([
             html.Thead(
                 html.Tr([html.Th(col) for col in dataframe.columns])
@@ -124,38 +147,92 @@ def generate_table(name, dataframe, max_rows=10):
         ])
     ])
 
-def generate_graph(crypto_df, reddit_df, twitter_df, start_date, end_date):
+def generate_table_updated(name, dataframe):
+    return html.Div([html.Br(),
+        html.H5(name),
+        dbc.Label(f"Total Articles Retrieved: {len(dataframe)}", 
+                    style={"font-weight": "600", "font-size": "14px"}),
+        html.Br(),
+        html.Div(
+            dash_table.DataTable(
+                id='articles-table',
+                columns=[
+                    {"name": i, "id": i, "selectable":False} for i in dataframe.columns
+                ],
+                data=dataframe.to_dict('records'),
+                style_table={'overflowX': 'auto'},
+                style_cell={
+                    'height': 'auto',
+                    # all three widths are needed
+                    'minWidth': '80px', 'width': '150px', 'maxWidth': '180px',
+                    'whiteSpace': 'normal',
+                    'textAlign': 'left',
+                    'fontSize': 12, 
+                    'font-family':'Verdana',
+                },
+                sort_action='native',
+                sort_mode='single',
+                sort_by=[]
+            ), 
+            style={'width': '100%', 'display': 'inline-block'})
+])
 
-    df1 = get_count_by_date(crypto_df, start_date, end_date)
-    df2 = get_count_by_date(reddit_df, start_date, end_date)
-    df3 = get_count_by_date(twitter_df, start_date, end_date)
 
-    df1['source_type'] = 'crypto'
-    df2['source_type'] = 'reddit'
-    df3['source_type'] = 'twitter'
+def generate_graph(crypto_df, reddit_df, twitter_df, entity, start_date, end_date):
+
+    # df1 = get_count_by_date(crypto_df, start_date, end_date)
+    # df2 = get_count_by_date(reddit_df, start_date, end_date)
+    # df3 = get_count_by_date(twitter_df, start_date, end_date)
+
+    # get risk score by source
+    df1 = get_risk_score_by_date(crypto_df, start_date, end_date)
+    df2 = get_risk_score_by_date(reddit_df, start_date, end_date)
+    df3 = get_risk_score_by_date(twitter_df, start_date, end_date)
+
+    df1['source_type'] = 'News'
+    df2['source_type'] = 'Reddit'
+    df3['source_type'] = 'Twitter'
 
     result = pd.concat([df1, df2], ignore_index=True, sort=False)
     result = pd.concat([result, df3], ignore_index=True, sort=False)
     result['date'] = result['index'].dt.date
 
-    fig = px.line(result, x= 'index', y='label', color='source_type')
+    # fig = px.line(result, x= 'index', y='label', color='source_type')
+    fig = px.line(result, x='index', y='probability_risk', color='source_type')
     
+    # get overall risk score
+    sample_risk_data = pd.read_csv("sample_risk_data.csv")
+
     fig.update_layout(
-        title="Number of posts/articles labelled high-risk over time",
+        # title="Number of posts/articles labelled high-risk over time",
         title_x=0.5,
         xaxis_title="Date",
-        yaxis_title="Count",
+        yaxis_title="Risk Score (in %)",
         legend_title="Source"
     )
     
     count_graph = html.Div([
-        html.H5("Count of Risky Articles over Time"),
+        html.H5("Risk Score over Time"),
         dcc.Graph(figure=fig)
     ]
     )
     
     return count_graph
 
+def get_risk_score_by_date(df, start_date, end_date):
+    # Group data by date and find the number of posts predicted as risky 
+    df2 = df.groupby(['date'])['probability_risk'].mean()
+    df = df.drop(['date'], axis = 1)
+
+    # Get all date within range and fill dates with no data with 0 
+    idx = pd.date_range(start_date, end_date)
+    df2.index =  pd.DatetimeIndex(df2.index)
+    df2 = df2.reindex(idx, fill_value=0) 
+
+    df2 = df2.reset_index()
+    return df2
+
+'''
 def get_count_by_date(df, start_date, end_date):
 
     #Group data by date and find the number of posts predicted as risky 
@@ -169,7 +246,7 @@ def get_count_by_date(df, start_date, end_date):
 
     df2 = df2.reset_index()
     return df2
-
+'''
 
 # when submit button is pressed, run query
 @app.callback(
@@ -221,24 +298,39 @@ def render_page_content(n_clicks, entity, start_date, end_date):
     sample_data['article_date'] = pd.to_datetime(sample_data.article_date)
     
     # Filter by entity and date range
-    df = sample_data[(sample_data.entity == entity) & (sample_data.article_date >= start_date) & (sample_data.article_date <= end_date)]
+    df = sample_data.copy()
+    df['entity'] = df['entity'].str.lower()
+    df = df.loc[df['entity'] == entity.lower()]
+    df = df.loc[(df['article_date'] >= start_date) & (df['article_date'] <= end_date)]
+    
     df['label'] = df['probability_risk'].apply(lambda x: 1 if x >= 0.5 else 0)
+    
+    # Format 
     df['date'] = df['article_date'].dt.date
+    df = df.round({'predicted_risk': 2})
     crypto_df = df[(df.source!="twitter") & (df.source!="reddit")]
-    reddit_df = df[df.source=="reddit"]
-    twitter_df = df[df.source=="twitter"]
+    reddit_df = df.loc[df['source']=="reddit"]
+    twitter_df = df.loc[df['source']=="twitter"]
 
-    count_graph = generate_graph(crypto_df, reddit_df, twitter_df, str(start_date),str(end_date))
+    count_graph = generate_graph(crypto_df, reddit_df, twitter_df, entity, str(start_date),str(end_date))
 
+
+    # rename columns
+    columns = {"date": "Date", "content": "Content", \
+                "url": "URL", "predicted_risk": "Risk Score"}
+    
     # slice dataframe
-    crypto_df = crypto_df[["article_date", "content", "predicted_risk"]].sort_values("predicted_risk", ascending = False)
-    reddit_df = reddit_df[["article_date", "content", "predicted_risk"]].sort_values("predicted_risk", ascending = False)
-    twitter_df = twitter_df[["article_date", "content", "predicted_risk"]].sort_values("predicted_risk", ascending = False)
+    crypto_df = pd.DataFrame(crypto_df[columns.keys()].sort_values("predicted_risk", ascending = False))
+    reddit_df = pd.DataFrame(reddit_df[columns.keys()].sort_values("predicted_risk", ascending = False))
+    twitter_df = pd.DataFrame(twitter_df[columns.keys()].sort_values("predicted_risk", ascending = False))
 
     # tables
-    crypto_table = generate_table("Conventional and Cryptonews", crypto_df)
-    reddit_table = generate_table("Reddit", reddit_df)
-    twitter_table = generate_table("Twitter", twitter_df)
+    # crypto_table = generate_table("Conventional and Cryptonews", crypto_df.rename(columns=columns))
+    # reddit_table = generate_table("Reddit", reddit_df.rename(columns=columns))
+    # twitter_table = generate_table("Twitter", twitter_df.rename(columns=columns))
+    crypto_table = generate_table_updated("Conventional and Cryptonews", crypto_df.rename(columns=columns))
+    reddit_table = generate_table_updated("Reddit", reddit_df.rename(columns=columns))
+    twitter_table = generate_table_updated("Twitter", twitter_df.rename(columns=columns))
 
     return (score_display, count_graph, crypto_table, reddit_table, twitter_table)
 
