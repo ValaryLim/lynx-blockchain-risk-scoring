@@ -3,18 +3,12 @@ import pandas as pd
 import datetime as dt
 from datetime import datetime
 from func_timeout import func_timeout, FunctionTimedOut
+from utils.data_filter import filter_in, filter_out, filter_entity, process_duplicates, enTweet
+from langdetect import detect
 
 def get_tweet(config):
     twint.run.Search(config) 
-    tlist = config.search_tweet_list
-
-    # tweets selection condition to be customised
-    # c.Min_likes = 500
-    # c.Min_retweets = 50
-    # c.Min_replies = 50
-    # other paramters: https://github.com/twintproject/twint/blob/master/twint/config.py
-
-    
+    tlist = config.search_tweet_list   
     return tlist
 
 def twitter_scrape_byentity(entity, start_date, end_date):
@@ -43,14 +37,23 @@ def twitter_scrape_byentity(entity, start_date, end_date):
     df['date_time'] = df['date']
     df['author'] = df['username']
     df['text'] = df ['tweet']
+
+    # filter out irrelevant data
+    mask1 = list(df.apply(lambda x: filter_out(x["text"]), axis=1))
+    df = df[mask1]
+    mask2 = list(df.apply(lambda x: filter_in(x["text"]), axis=1))
+    df = df[mask2]
+    mask3 = list(df.apply(lambda x: filter_entity(str(x["text"]), entity), axis=1))
+    df = df[mask3]
+    mask4 = list(df.apply(lambda x: enTweet((x["text"]), axis=1)))
+    df = df[mask4]
+
+    # process duplicates
+    df = process_duplicates(df)
+
     df = df[['date_time', 'text', 'author', 'article_url', 'entity']]
     return df
 
-def get_tweet(config):
-    twint.run.Search(config) 
-    tlist = config.search_tweet_list
-    
-    return tlist
 
 
 # entity = 'binance'
@@ -71,7 +74,4 @@ def get_tweet(config):
 #         df.to_csv(f"./2020_04/{entity}.csv")
 #     except:
 #         continue
-    
-    
-    
     
