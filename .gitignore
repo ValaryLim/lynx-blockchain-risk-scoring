@@ -23,5 +23,10 @@ sentiment-analysis/utils/fasttext/
 evaluation/data
 evaluation/.ipynb_checkpoints
 
+scoring/.ipynb_checkpoints
+scoring/data
+scoring/utils/__pycache__
+scoring/.ipynb_checkpoints
+
 .gitsecret/keys/random_seed
 !*.secret
