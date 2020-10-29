@@ -11,7 +11,6 @@ from entity_risk_score import entity_risk_score
 
 def get_data(entity_list, start_date, end_date):
     '''
-
     Input:
         entity_list (list):
         start_date (datetime):
@@ -23,11 +22,12 @@ def get_data(entity_list, start_date, end_date):
     c = conn.cursor()
 
     # Retrieve data from web scraping and store in database
-    for entity:
-        df = retrieve_data(entity_list, start_date, end_date)
-        score = 
-        score["entity"] = entity
-    # df = retrieve_data(entity, start, end)
+    # for entity:
+    #     df = retrieve_data(entity_list, start_date, end_date)
+    #     score = 
+    #     score["entity"] = entity
+    
+    df = retrieve_data(entity, start, end)
     
     
     #df.to_csv(r'~/Desktop/test.csv', index = False)
@@ -44,7 +44,7 @@ def get_data(entity_list, start_date, end_date):
 
 
 ############# Testing #############
-get_data(['binance','bitfinex', 'huobi', 'okex', 'upbit'], datetime(2020,9,1), datetime(2020,10,26))
+#get_data(['binance','bitfinex', 'huobi', 'okex', 'upbit'], datetime(2020,9,1), datetime(2020,10,26))
 ###################################
 
 
@@ -63,7 +63,7 @@ def train(filepath):
         SELECT * FROM POST_DATA
         ''')
 
-    df = pd.DataFrame(c.fetchall(), columns = ['uid', 'sourceID', 'source','article_date','content', 'url', 'count',\
+    df = pd.DataFrame(c.fetchall(), columns = ['uid', 'source_id', 'source','article_date','content', 'url', 'count',\
                     'img_link','entity','author','ground_truth_risk','probability_risk','predicted_risk','coin'])  
     
     #Retrain model
