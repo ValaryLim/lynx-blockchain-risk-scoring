@@ -8,10 +8,11 @@ from cryptocontrol import cryptocontrol_scrape
 # import sys
 # sys.path.insert(1, './utils/')
 from utils.data_filter import filter_out, filter_entity, process_duplicates
+from utils.get_coins import get_coins
 
 def conventional_scrape_by_entity(entity, start_date, end_date):
-    column_names = ["date_time", "title", "excerpt", "domain", \
-        "article_url", "image_url", "hotness", "activity_hotness"]
+    column_names = ["date_time", "title", "excerpt", "domain", "article_url",\
+         "image_url", "hotness", "activity_hotness"]
     combined_df = pd.DataFrame(columns = column_names)
 
     # retrieve data
@@ -52,8 +53,14 @@ def conventional_scrape_by_entity(entity, start_date, end_date):
     combined_df["entity"] = entity
     combined_df = process_duplicates(combined_df)
 
+    # get coins that are relevant in text 
+    combined_df['coin'] = combined_df['text'].apply(lambda x: get_coins(x))
+
     # reset index
     combined_df = combined_df.reset_index(drop=True)
+
+    combined_df = combined_df.rename({'text':'content', 'article_url':'url', 'domain':'source', \
+                                    'date_time':'article_date'}, axis = 1)
 
     return combined_df
 

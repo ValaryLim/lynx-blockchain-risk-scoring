@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
-import sys
-sys.path.insert(0, '../sentiment-analysis/utils/')
-from text_processing import text_processing
-sys.path.remove('../sentiment-analysis/utils/')
+
+from utils.text_processing import text_processing
 from simpletransformers.classification import ClassificationModel, ClassificationArgs
 
 def to_binary(prob):
@@ -24,7 +22,7 @@ def model_train(data, output_dir='models/'):
     '''
 
     # extract relevant columns
-    df = pd.DataFrame(data[['content, ground_truth_risk, probability_risk']])
+    df = pd.DataFrame(data[['content', 'ground_truth_risk', 'probability_risk']])
 
     # if ground truth risk is NA, convert probability to ground truth risk to train
     df_NA = df[df['ground_truth_risk'].isnull()]
