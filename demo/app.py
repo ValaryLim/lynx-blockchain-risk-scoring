@@ -4,28 +4,10 @@ import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
+import plotly.express as px
 
 import pandas as pd
 from datetime import datetime
-
-# data
-import sys
-sys.path.insert(1, '../scraping')
-from main_conventional import conventional_scrape_by_entity
-from main_crypto import crypto_scrape_by_entity
-from reddit import reddit_scrape_byentity
-
-# data processing
-import string 
-import nltk
-from nltk.stem import WordNetLemmatizer # word lemmatizer
-from nltk.stem.snowball import SnowballStemmer
-from nltk.corpus import stopwords # stopwords
-
-# models
-import fasttext
-sys.path.insert(1, '../sentiment-analysis')
-from vader import vader_predict
 
 # set application
 app = dash.Dash(__name__, external_stylesheets=["assets/datepicker.css", dbc.themes.BOOTSTRAP])
@@ -51,62 +33,73 @@ CONTENT_STYLE = {
     "font-size": "12px"
 }
 
+# styles for the score displays
+SCORE_STYLE = {
+    "font-size": "15px", 
+    "font-weight": "600", 
+    "background-color": "#f1f4f9", 
+    "height": "80px", 
+    "border-radius": "25px", 
+    "text-align": "center"
+
+}
+
 #### SIDEBAR ##################################################################
+sidebar = html.Div(
+    [
+        html.P("Lynx Demo", className="display-4"),
+        html.H6("Demonstration Dashboard for BT4103", className="lead"),
+        html.Hr(),
+    ],
+    style=SIDEBAR_STYLE,
+)
+
+#### CONTENT ##################################################################
 # entity input
 entity_input = html.Div([
     dbc.Label("Entity Name", className="p", style={"font-weight": "600"}),
+    html.Br(),
     dbc.Input(id="entity-input", placeholder="Type entity name here", \
         type="text", bs_size="md", className="mb-3", \
             style={"font-size": "14px"})
-])
+], style={'width': '20%', 'display': 'inline-block', 'margin-right': 250})
 
-model_input = html.Div([
-    dbc.Label("Model", className="p", style={"font-weight": "600"}),
-    dbc.RadioItems(
-        options=[
-            {"label": "BERT", "value": "bert"},
-            {"label": "FastText", "value": "fasttext"},
-            {"label": "Word-2-Vec", "value": "wordvec"},
-            {"label": "Vader", "value": "vader"},
-        ],
-        id="model-input", value="bert", inline=True,
-        style={"font-size": "14px"})
-], style={"font-size": "14px"})
-
+# date input
 date_input = html.Div([
     dbc.Label("Date Range", className="p", style={"font-weight": "600"}),
     html.Br(),
     dcc.DatePickerRange(
         id="date-input",
         style={"font-size": "10px"},
+        min_date_allowed = '2020-01-01',
         max_date_allowed = datetime.today(),
         initial_visible_month = datetime.today()
     )
-])
+], style={'width': '40%', 'display': 'inline-block', 'margin-right': 100})
+
 # submit button
-submit_button = dbc.Button("Submit", color="dark", block=True, id="submit")
+submit_button = dbc.Button("Submit", color="dark", block=True, id="submit", style={'width': '10%', 'display': 'inline-block'})
 
-sidebar = html.Div(
+content = html.Div(
     [
-        html.P("Lynx Demo", className="display-4"),
-        html.H6("Demonstration Dashboard for BT4103", className="lead"),
-        html.Hr(),
-        entity_input,
-        model_input,
-        html.Br(),
-        date_input,
-        html.Br(),
-        submit_button
-    ],
-    style=SIDEBAR_STYLE,
-)
 
-#### CONTENT ##################################################################
-content = html.Div([
-    html.Div(id="conventional-news"),
-    html.Div(id="reddit-news"),
-    html.Div(id="twitter-news"),
-], id="page-content", style=CONTENT_STYLE)
+        entity_input,
+        date_input,
+        submit_button,
+        html.Hr(),
+        html.Br(),
+        html.Br(),
+        html.Div(id = "score-display"),
+        html.Br(),
+        html.Br(),
+        html.Div(id = "count-graph"),
+        html.Div(id="conventional-news"),
+        html.Div(id="reddit-news"),
+        html.Div(id="twitter-news"),
+        
+    ], 
+    id="page-content", style=CONTENT_STYLE,
+)
 
 #### LAYOUT ###################################################################
 
@@ -131,93 +124,123 @@ def generate_table(name, dataframe, max_rows=10):
         ])
     ])
 
-def pre_processing(text, lemmatize=True, stem=False):
-    '''
-    Preprocessing for fasttext model
-    '''
-    # strip accents
-    text = text.encode('ascii', 'ignore')
-    text = str(text.decode("utf-8"))
+def generate_graph(crypto_df, reddit_df, twitter_df, start_date, end_date):
 
-    # covert to lowercase
-    text = text.lower()
+    df1 = get_count_by_date(crypto_df, start_date, end_date)
+    df2 = get_count_by_date(reddit_df, start_date, end_date)
+    df3 = get_count_by_date(twitter_df, start_date, end_date)
 
-    # remove punctuation
-    text = text.translate(str.maketrans(string.punctuation, ' '*len(string.punctuation)))
+    df1['source_type'] = 'crypto'
+    df2['source_type'] = 'reddit'
+    df3['source_type'] = 'twitter'
 
-    # remove unnecessary white spaces
-    text = text.replace("\n", "")
+    result = pd.concat([df1, df2], ignore_index=True, sort=False)
+    result = pd.concat([result, df3], ignore_index=True, sort=False)
+    result['date'] = result['index'].dt.date
 
-    # tokenize
-    text_words = nltk.word_tokenize(text)
+    fig = px.line(result, x= 'index', y='label', color='source_type')
+    
+    fig.update_layout(
+        title="Number of posts/articles labelled high-risk over time",
+        title_x=0.5,
+        xaxis_title="Date",
+        yaxis_title="Count",
+        legend_title="Source"
+    )
+    
+    count_graph = html.Div([
+        html.H5("Count of Risky Articles over Time"),
+        dcc.Graph(figure=fig)
+    ]
+    )
+    
+    return count_graph
 
-    # lemmatize
-    if lemmatize:
-        wordnet_lemmatizer = WordNetLemmatizer()
-        text_words = [wordnet_lemmatizer.lemmatize(x, pos="v") for x in text_words]
+def get_count_by_date(df, start_date, end_date):
 
-    # stem
-    if stem:
-        stemmer = SnowballStemmer("english")
-        text_words = [stemmer.stem(x) for x in text_words]
+    #Group data by date and find the number of posts predicted as risky 
+    df2 = df.groupby(['date']).sum()
+    df = df.drop(['date'], axis = 1)
 
-    # remove stop words
-    stop = list(stopwords.words('english'))
-    keep_stopwords = ["no", "not", "nor"]
-    for word in keep_stopwords:
-        stop.remove(word)
-        stop = set(stop)
-    text_words = [x for x in text_words if not x in stop]
+    #Get all date within range and fill dates with no data with 0 
+    idx = pd.date_range(start_date, end_date)
+    df2.index =  pd.DatetimeIndex(df2.index)
+    df2 = df2.reindex(idx, fill_value=0) 
 
-    return ' '.join(text_words)
+    df2 = df2.reset_index()
+    return df2
+
 
 # when submit button is pressed, run query
 @app.callback(
-    [Output("conventional-news", "children"),
+    [Output("score-display", "children"),
+    Output("count-graph", "children"),
+    Output("conventional-news", "children"),
     Output("reddit-news", "children"),
     Output("twitter-news", "children")], 
     [Input("submit", "n_clicks")],
     [State("entity-input", "value"), 
-    State("model-input", "value"), 
     State("date-input", "start_date"),
-    State("date-input", "end_date")]
+    State("date-input", "end_date")
+    ]
 )
-def render_page_content(n_clicks, entity, model, start_date, end_date):
+
+def render_page_content(n_clicks, entity, start_date, end_date):
     if n_clicks == None:
-        return (None, None, None)
+        return (None, None, None, None, None)
 
     # convert start and end date to datetime
     start_date_datetime = datetime.strptime(start_date, "%Y-%m-%d")
     end_date_datetime = datetime.strptime(end_date, "%Y-%m-%d")
     end_date_datetime = end_date_datetime.replace(hour=23, minute=59)
+
+    # generate score display
+    score_display = html.Div([
+        dbc.Label("Open Source Information", className="p", style={"font-size": "30px", "font-weight": "600", 'display': 'inline-block', 'margin-right': 50}),
+        dbc.Col(html.Div("Overall score"), style={"font-size": "15px", "font-weight": "600", 'width': '10%', 'display': 'inline-block', "background-color": "#D77560", "height": "30px", "border-radius": "25px", "text-align": "center"}),
+        html.Br(),
+        html.Br(),
+        dbc.Row(
+            [
+                dbc.Col(html.Div("News", style=SCORE_STYLE)),
+                dbc.Col(html.Div("Reddit", style=SCORE_STYLE)),
+                dbc.Col(html.Div("Twitter", style=SCORE_STYLE)),
+            ]
+        ),   
+    ]
+    )
+
+    # generate graph
+    count_graph = html.Div([
+        html.H5("Count of Risky Articles over Time")]
+    )
+    sample_data = pd.read_csv("sample_data.csv", index_col=0)
     
-    # retrieve data based on information
-    crypto_df = conventional_scrape_by_entity(entity, start_date_datetime, end_date_datetime)
-    crypto_df = pd.concat([crypto_df, crypto_scrape_by_entity(entity, start_date_datetime, end_date_datetime)])
-    crypto_df["text"] = crypto_df["title"].fillna('') + " " + crypto_df["excerpt"].fillna('')
+    # Process imported dataframe
+    # Get datetime format for df date and filter for range
+    sample_data['article_date'] = pd.to_datetime(sample_data.article_date)
     
-    reddit_df = reddit_scrape_byentity(entity, start_date_datetime, end_date_datetime)
-    reddit_df["text"] = reddit_df["title"].fillna('') + " " + reddit_df["excerpt"].fillna('')
+    # Filter by entity and date range
+    df = sample_data[(sample_data.entity == entity) & (sample_data.article_date >= start_date) & (sample_data.article_date <= end_date)]
+    df['label'] = df['probability_risk'].apply(lambda x: 1 if x >= 0.5 else 0)
+    df['date'] = df['article_date'].dt.date
+    crypto_df = df[(df.source!="twitter") & (df.source!="reddit")]
+    reddit_df = df[df.source=="reddit"]
+    twitter_df = df[df.source=="twitter"]
 
-    # process text for modelling
-    crypto_df["text_processed"] = crypto_df["text"].apply(lambda x: pre_processing(x, lemmatize=True, stem=False))
-    reddit_df["text_processed"] = reddit_df["text"].apply(lambda x: pre_processing(x, lemmatize=True, stem=False))
-
-    # load model
-    if model == 'fasttext':
-        model_fasttext = fasttext.load_model("../sentiment-analysis/models/fasttext/sample_all_lemmatize.bin")
-        crypto_df["label"] = crypto_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
-        reddit_df["label"] = reddit_df["text_processed"].apply(lambda x: int(model_fasttext.predict(x)[0][0][-1]))
-
-    elif model == 'vader':
-        crypto_df["label"] = crypto_df["text"].apply(lambda x: vader_predict(x))
-        reddit_df["label"] = reddit_df["text"].apply(lambda x: vader_predict(x))
+    count_graph = generate_graph(crypto_df, reddit_df, twitter_df, str(start_date),str(end_date))
 
     # slice dataframe
-    crypto_df = crypto_df[["date_time", "text", "label"]]
-    reddit_df = reddit_df[["date_time", "text", "label"]]
+    crypto_df = crypto_df[["article_date", "content", "predicted_risk"]].sort_values("predicted_risk", ascending = False)
+    reddit_df = reddit_df[["article_date", "content", "predicted_risk"]].sort_values("predicted_risk", ascending = False)
+    twitter_df = twitter_df[["article_date", "content", "predicted_risk"]].sort_values("predicted_risk", ascending = False)
 
-    return (generate_table("Conventional and Cryptonews", crypto_df),  generate_table("Reddit", reddit_df), None)
+    # tables
+    crypto_table = generate_table("Conventional and Cryptonews", crypto_df)
+    reddit_table = generate_table("Reddit", reddit_df)
+    twitter_table = generate_table("Twitter", twitter_df)
+
+    return (score_display, count_graph, crypto_table, reddit_table, twitter_table)
 
 if __name__ == "__main__":
     app.run_server(debug=True, host='127.0.0.1')

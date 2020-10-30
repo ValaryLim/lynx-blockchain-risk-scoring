@@ -1,10 +1,13 @@
 import pandas as pd
 from psaw import PushshiftAPI
 from datetime import datetime, timedelta
-from utils.data_filter import filter_out, filter_in
+# import sys
+# sys.path.insert(1, './utils')
 
+from utils.data_filter import filter_in, filter_out, filter_entity, process_duplicates
+from utils.get_coins import get_coins
 
-def reddit_scrape_byentity(entity, start_date, end_date):
+def reddit_scrape_by_entity(entity, start_date, end_date):
 
     api = PushshiftAPI()
 
@@ -32,7 +35,7 @@ def reddit_scrape_byentity(entity, start_date, end_date):
     
     #Query and generate the related information
     gen_submission = api.search_submissions(q=entity,after= start_epoch, before = end_epoch,
-            filter=['created_utc', 'title', 'selftext', 'permalink', 'author', 'subreddit'],
+            filter=['created_utc', 'title', 'selftext', 'permalink', 'author', 'subreddit', 'id'],
             subreddit = subreddits)
 
     #Generate dataframe for required data
@@ -54,12 +57,11 @@ def reddit_scrape_byentity(entity, start_date, end_date):
         df_submission = df_submission.rename(columns={'selftext': 'excerpt', 'permalink':'article_url'})
 
 
-
     ############################## Comments ################################
 
     #Query and generate the related information
     gen_comments = api.search_comments(q=entity,after= start_epoch, before = end_epoch,
-            filter=['created_utc', 'body', 'permalink', 'author', 'subreddit'],
+            filter=['created_utc', 'body', 'permalink', 'author', 'subreddit', 'id'],
             subreddit = subreddits)
 
 
@@ -75,6 +77,7 @@ def reddit_scrape_byentity(entity, start_date, end_date):
         df_comment['subreddit'] = df_comment['subreddit'].apply(lambda x: x.lower())
         df_comment['excerpt'] = ''
         df_comment['type'] = 'comments'
+        df_comment['id'] = 'comments/' + df_comment['id']
 
         #Remove unecessary columns of data
         df_comment = df_comment.drop(columns = ['created_utc','created'])
@@ -82,22 +85,41 @@ def reddit_scrape_byentity(entity, start_date, end_date):
         #For comments, there are no titles so the body of the comment will be used as the title
         df_comment = df_comment.rename(columns={'body': 'title', 'permalink':'article_url'})    
 
-
-
-    #Concatenate submissions and comments dataframe
-    df = df_submission.append(df_comment)
+    # concatenate submissions and comments dataframe
+    # concatenate submissions and comments dataframe
+    df = pd.DataFrame(columns = ['author', 'article_url', 'excerpt', 'subreddit','title', 'date_time','type','entity'])
+    df = df.append(df_submission)
+    df = df.append(df_comment)
+    
     df['entity'] = entity
     
-    #Filter the data with relevant keywords
-    df.fillna('')
-    df = df[df.apply(lambda x: filter_in(x["title"]) or filter_in(x["excerpt"]), axis=1)]
-    df = df[df.apply(lambda x: filter_out(x["title"]) and filter_out(x["excerpt"]), axis=1)]
+    df = df.fillna('')
+    df["text"] = df["title"] + " " + df["excerpt"]
 
+    # filter out irrelevant data
+    mask1 = list(df.apply(lambda x: filter_out(x["title"]) and filter_out(x["excerpt"]), axis=1))
+    df = df[mask1]
+    mask2 = list(df.apply(lambda x: filter_in(x["title"]) or filter_in(x["excerpt"]), axis=1))
+    df = df[mask2]
+    mask3 = list(df.apply(lambda x: filter_entity(str(x["text"]), entity), axis=1))
+    df = df[mask3]
 
-    #Output dataframe columns: [author, title, article_url, date_time, subreddit, excerpt]
+    # process duplicates
+    df = process_duplicates(df)
+
+    # find all coins that are relevant in text
+    df['coin'] = df['text'].apply(lambda x: get_coins(x))
+
+    # reset index
+    df = df.reset_index(drop=True)
+
+    # add source column
+    df['source'] = 'reddit'
+
+    # rename columns to standardise with database schema
+    df = df.rename({'text':'content', 'article_url':'url', 'date_time':'article_date','id':'source_id'}, axis = 1)
+
     return df
-
-
 
 
 def reddit_scrape(entity_list, start, end):
@@ -106,13 +128,20 @@ def reddit_scrape(entity_list, start, end):
 
     #Iterate through list of entities
     for entity in entity_list:
-
+        
         #retrieve dataframe consisting of all data for each entity
-        df = reddit_scrape_byentity(entity, start, end)
+        df = reddit_scrape_by_entity(entity, start, end)
 
         #Join the dataframes by column
         output_df = output_df.append(df)
 
+    # reset index
+    output_df = output_df.reset_index(drop=True)
+    
     return output_df
 
-
+# entity = ['okex', 'huobi']
+# start_date = datetime(2020, 10, 15)
+# end_date = datetime(2020, 10, 26, 23, 59, 59)
+# df = reddit_scrape(entity, start_date, end_date)
+# df.to_csv(r'~/Desktop/reddit_sample.csv', index = False)

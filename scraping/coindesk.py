@@ -1,98 +1,70 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
-from bs4 import BeautifulSoup
-from datetime import datetime
 import pandas as pd
+import requests
+from datetime import datetime
 import time
 
+def coindesk_scrape(entity, start_date, end_date):
 
-def coindesk_scrape(entity, start_date, end_date): 
-    # remove notifications
-    chrome_options = webdriver.ChromeOptions()
-    prefs = {"profile.default_content_setting_values.notifications" : 2}
-    chrome_options.add_experimental_option("prefs", prefs)
-    
-    # create driver
-    driver = webdriver.Chrome('../scraping/utils/chromedriver', options=chrome_options)
+    #dictionary to store the relevant data
+    data_store = {'date_time':[], 'title':[], 'excerpt':[], 'article_url':[],  'author':[], 'image_url':[]}
 
-    # search for webpage
-    website = "https://www.coindesk.com/"
-    search = f"{website}search?q={entity}&s=relevant"
-    driver.get(search)
+    #Request and get url
+    def retrieve_data(entity, page):
+        #Link to retrieve data from
+        url = 'https://www.coindesk.com/wp-json/v1/search?keyword=' + str(entity) + '&page=' + str(page)
+        data = requests.get(url).json()
+        return data['results']
 
-    column_names = ["date_time", "title", "excerpt", "article_url",  "category"]
-    df = pd.DataFrame(columns = column_names)
+    page = 1
+    page_data = retrieve_data(entity, page)
 
-    # preliminary search of all articles
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-    time.sleep(3)
-    articles = driver.find_elements_by_class_name("list-item-wrapper")
-    
-    try:
-        soup = BeautifulSoup(articles[-2].get_attribute("innerHTML"), features="html.parser")
-    except:
-        driver.quit()
-        return df
+    #Retrieve datetime for the last submission in the page
+    last = end_date
 
-    # time 1
-    date_string = date_string = soup.find("time").text
-    date_time = datetime.strptime(date_string, "%b %d, %Y")
-
-    # keep pressing load more button until reach start date
-    current_date = date_time
-    while current_date >= start_date:
-        try: 
-            # refind load button and press
-            # driver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
-            # time.sleep(2)
-            load_more_button = driver.find_element_by_xpath("//button[@class='button primary-button primary-button-default']")
-            action = ActionChains(driver)
-            action.move_to_element(load_more_button).click(load_more_button).perform()
-            time.sleep(3)
-        except:
-            # no more pages to load
+    while last >= start_date:
+        
+        if page_data == []:
             break
+        else:
+            for article in page_data:
+                date_time =  datetime.strptime(article['date'], "%Y-%m-%dT%H:%M:%S")
+                last = date_time
 
-        # retrieve articles again
-        articles = driver.find_elements_by_class_name("list-item-wrapper")
-        soup = BeautifulSoup(articles[-2].get_attribute("innerHTML"), features="html.parser")
+                if date_time <= end_date and date_time >= start_date: 
+                    data_store['date_time'].append(date_time)
 
-        # retrieve earliest date
-        date_string = soup.find("time").text
-        date_time = datetime.strptime(date_string, "%b %d, %Y")
+                    title = article['title']
+                    data_store['title'].append(title)
+                
+                    excerpt = article['text']
+                    data_store['excerpt'].append(excerpt)
 
-        current_date = date_time    
+                    article_url = article['url']
+                    article_url = article_url.replace("\\", "")
+                    data_store['article_url'].append(article_url)
 
-    # retrieve details from all articles
-    for article in articles[:-1]: 
-        soup = BeautifulSoup(article.get_attribute("innerHTML"), features="html.parser")
+                    author = article['author'][0]['name']
+                    data_store['author'].append(author)
 
-        # retrieve date
-        date_string = soup.find("time").text
-        date_time = datetime.strptime(date_string, "%b %d, %Y")
+                    image = article['images']['images']['desktop']['src']
+                    data_store['image_url'].append(image)
+                
+            page += 1
+            page_data = retrieve_data(entity, page)
 
-        if date_time > end_date:
-            continue
-
-        if date_time < start_date:
-            break
-
-        # retrieve category, url, text and excerpt
-        article_module = soup.find(class_="text-content")
-        category = article_module.find("span").text
-        article_url = website + article_module.find("a")["href"]
-        title_text = article_module.find("h4").text
-        excerpt = article_module.find(class_="card-text").text.strip()
-
-        # add information to dataframe
-        df = df.append({"date_time": date_time, "title": title_text, "excerpt": excerpt, "article_url": article_url, "category": category}, ignore_index=True)
-
-    driver.quit()
+    df = pd.DataFrame(data_store)
     return df
 
 
-# testing function
-# start_date = datetime(2020, 8, 27)
-# end_date = datetime(2020, 8, 28)
-# test = coindesk_scrape("bitcoin", start_date, end_date)
+###############Testing################
+# entity = 'binance'
+# start_date = datetime(2020, 7, 28)
+# end_date = datetime(2020, 9, 20,23,59,59)
+# df = coindesk_scrape(entity, start_date, end_date)
+# ######################################
+
+
+# df.to_csv(r'/Users/JX/Desktop/coindesk.csv')
+
+
+
