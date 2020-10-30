@@ -19,10 +19,13 @@ def cryptocontrol_scrape(entity):
 
     # create data frame
     column_names = ["date_time", "title", "excerpt", "domain", \
-        "article_url", "image_url", "hotness", "activity_hotness"]
+        "article_url", "image_url", "hotness", "activity_hotness", "source_id"]
     df = pd.DataFrame(columns = column_names)
 
     for article in articles:
+        # retrieve id
+        source_id = article["_id"]
+
         # retrieve date
         date_string = article["publishedAt"][:-5]
         date_time = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%S")
@@ -42,9 +45,10 @@ def cryptocontrol_scrape(entity):
         df = df.append({"date_time": date_time, "title": title, \
             "excerpt": excerpt, "article_url": article_url, \
                 "image_url": image_url, "hotness": hotness, \
-                    "activity_hotness": activity_hotness
+                    "activity_hotness": activity_hotness, \
+                        "source_id": source_id
             }, ignore_index=True)
 
     return df
 
-# print(cryptocontrol("ethereum"))
+# print(cryptocontrol_scrape("ethereum"))
