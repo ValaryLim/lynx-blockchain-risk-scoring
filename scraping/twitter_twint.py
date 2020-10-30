@@ -11,7 +11,7 @@ def get_tweet(config):
     tlist = config.search_tweet_list   
     return tlist
 
-def twitter_scrape_byentity(entity, start_date, end_date):
+def twitter_scrape_byentity_helper(entity, start_date, end_date):
 
     c = twint.Config() 
     c.Search = entity 
@@ -54,6 +54,14 @@ def twitter_scrape_byentity(entity, start_date, end_date):
     df = df[['date_time', 'text', 'author', 'article_url', 'entity']]
     return df
 
+def twitter_scrape_byentity(entity, start_date, end_date):
+    try:
+        df = func_timeout(30, twitter_scrape_byentity_helper, args=(entity, start_date, end_date))
+        return df
+    except:
+        # return empty df
+        df = pd.DataFrame(columns = ['date_time', 'text', 'author', 'article_url', 'entity'])
+        return df
 
 
 # entity = 'binance'
