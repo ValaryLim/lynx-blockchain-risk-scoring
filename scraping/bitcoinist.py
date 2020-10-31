@@ -4,9 +4,9 @@ from datetime import datetime
 import datetime as dt
 import pandas as pd
 import numpy as np
-import json
 
 def bitcoinist_scrape(entity, start_date, end_date):  
+    
     #Remove all ' ' characters in url
     entity = entity.replace(' ','+')
 
@@ -58,8 +58,7 @@ def bitcoinist_scrape(entity, start_date, end_date):
                 if date_time <= end_date and date_time >= start_date:
                     ## Store info in dataframe if it lies in the date range
                     data['date_time'].append(date_time)
-
-                    # retrieve url and text
+                    
                     # retrieve title and article_url
                     article_details = article.find('div', class_='news-content cf')
                     article_header = article_details.find('h3', class_='title').find('a')
@@ -96,11 +95,11 @@ def bitcoinist_scrape(entity, start_date, end_date):
 
 
 # ###############Testing################
-entity = 'binance'
-start_date = datetime(2020, 10, 26)
-end_date = datetime(2020, 10, 28)
-df = bitcoinist_scrape(entity, start_date, end_date)
-df.to_csv("temp.csv")
+# entity = 'binance'
+# start_date = datetime(2020, 10, 26)
+# end_date = datetime(2020, 10, 28)
+# df = bitcoinist_scrape(entity, start_date, end_date)
+# df.to_csv("temp.csv")
 # ######################################
 
     
