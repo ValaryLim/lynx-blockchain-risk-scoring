@@ -3,9 +3,9 @@ import requests
 from datetime import datetime
 import pandas as pd
 import numpy as np
-import json
 
 def cryptonews_scrape(entity, start_date, end_date):  
+    
     #Remove all ' ' characters in url
     entity = entity.replace(' ','+')
 
@@ -78,9 +78,9 @@ def cryptonews_scrape(entity, start_date, end_date):
     return df
 
 # ###############Testing################
-entity = 'binance'
-start_date = datetime(2020, 10, 1)
-end_date = datetime(2020, 10, 28)
-df = cryptonews_scrape(entity, start_date, end_date)
-df.to_csv("temp.csv")
+# entity = 'binance'
+# start_date = datetime(2020, 10, 1)
+# end_date = datetime(2020, 10, 28)
+# df = cryptonews_scrape(entity, start_date, end_date)
+# df.to_csv("temp.csv")
 # ######################################
