@@ -9,7 +9,7 @@ def forbes_scrape(entity, start_date, end_date):
     entity = entity.replace(' ','+')
 
     #Store data
-    data = {'date_time':[], 'title':[], 'excerpt':[], 'article_url':[], 'image_url':[], 'author':[], 'author_url':[]}
+    data = {'date_time':[], 'title':[], 'excerpt':[], 'article_url':[], 'image_url':[], 'author':[], 'author_url':[], 'source_id': []}
 
     page_num = 0
     last_date = end_date
@@ -57,6 +57,9 @@ def forbes_scrape(entity, start_date, end_date):
                     data['date_time'].append(date_time)
 
                     data['image_url'] = ''
+
+                    source_id = res["data-id"]
+                    data['source_id'].append(source_id)
 
             page_num += 1
 

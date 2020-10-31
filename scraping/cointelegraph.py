@@ -10,7 +10,7 @@ def cointelegraph_scrape(entity, start_date, end_date):
     entity = entity.replace(' ','+')
 
     #Store data
-    data = {'date_time':[], 'title':[], 'excerpt':[], 'article_url':[], 'image_url':[], 'author':[], 'author_url':[]}
+    data = {'date_time':[], 'title':[], 'excerpt':[], 'article_url':[], 'image_url':[], 'author':[], 'author_url':[], 'source_id': []}
 
     #retrieve 
     url = 'https://cointelegraph.com/search?query=' + entity
@@ -70,7 +70,10 @@ def cointelegraph_scrape(entity, start_date, end_date):
 
                         image = article['retina']
                         data['image_url'].append(image)
-                
+
+                        source_id = article['id']
+                        data['source_id'].append(source_id)
+                        
             page_num += 1
             page_data = retrieve_data(entity, page_num, token)
 
