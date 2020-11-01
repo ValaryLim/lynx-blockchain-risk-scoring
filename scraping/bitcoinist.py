@@ -44,19 +44,22 @@ def bitcoinist_scrape(entity, start_date, end_date):
                 date_info = article.find("span", {"class": "time"}).text
                 if date_info.find("min") != -1:
                     date_time = datetime.now() - dt.timedelta(minutes=int(date_info.split(" ")[0]))
-                if date_info.find("hour") != -1:
+                elif date_info.find("hour") != -1:
                     date_time = datetime.now() - dt.timedelta(hours=int(date_info.split(" ")[0]))
-                if date_info.find("day") != -1:
+                elif date_info.find("day") != -1:
                     date_time = datetime.now() - dt.timedelta(days=int(date_info.split(" ")[0]))
-                if date_info.find("week") != -1:
+                elif date_info.find("week") != -1:
                     date_time = datetime.now() - dt.timedelta(days=int(date_info.split(" ")[0])*7)
-                if date_info.find("month") != -1:
+                elif date_info.find("month") != -1:
                     date_time = datetime.now() - dt.timedelta(days=int(date_info.split(" ")[0])*30)
+                else:
+                    date_time = datetime.now() - dt.timedelta(days=int(date_info.split(" ")[0])*30*12)
 
                 last = date_time # update current date
 
                 if date_time <= end_date and date_time >= start_date:
                     ## Store info in dataframe if it lies in the date range
+                    # print("article time ", date_time)
                     data['date_time'].append(date_time)
                     
                     # retrieve title and article_url
