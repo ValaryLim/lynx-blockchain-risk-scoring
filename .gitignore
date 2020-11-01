@@ -31,5 +31,10 @@ automation/utils/data
 automation/utils/__pycache__
 automation/lynx_data.db
 
+scoring/utils/__pycache__
+scoring/data
+scoring/.ipynb_checkpoints
+
+
 .gitsecret/keys/random_seed
 !*.secret
