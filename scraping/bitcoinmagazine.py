@@ -1,4 +1,7 @@
-""" Articles on bitcoinmagazine are not sorted by date. """
+""" 
+Articles on bitcoinmagazine are not sorted by date
+and hence excluded from scraping. 
+"""
 
 from bs4 import BeautifulSoup
 from urllib.request import Request, urlopen
