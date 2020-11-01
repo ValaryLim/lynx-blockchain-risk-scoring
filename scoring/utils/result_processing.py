@@ -22,6 +22,28 @@ def process_dataframe(df):
     
     return df
 
+def process_dataframe_final(df):
+    # drop those with missing entities, date, risk predictions or counts
+    df = df.dropna(subset=["entity", "article_date", "predicted_risk", "count"])
+    
+    # change entity to lowercase
+    df["entity"] = df["entity"].apply(lambda x: x.lower())
+    
+    # change source to lowercase
+    df = df.fillna("")
+    df["source"] = df["source"].apply(lambda x: x.lower())
+
+    # add counter variable
+    df["counter"] = df["count"]
+    
+    # format date_time
+    df = format_date_time_final(df)
+
+    # retrieve date
+    df["date"] = df.article_date.apply(lambda x: x.date())
+    
+    return df
+
 def format_date_time(df):
     '''
     Formats date_time column into datetime object
@@ -34,6 +56,17 @@ def format_date_time(df):
     
     return df
 
+def format_date_time_final(df):
+    '''
+    Formats date_time column into datetime object
+    '''
+    for fmt in ('%Y-%m-%d %H:%M:%S', '%d/%m/%y %H:%M', '%d/%m/%y'):
+        try:
+            df['article_date'] = pd.to_datetime(df.article_date, format=fmt)
+        except ValueError:
+            pass
+    
+    return df
 
 def process_duplicates(df, subset=["text", "entity"]):
     '''
