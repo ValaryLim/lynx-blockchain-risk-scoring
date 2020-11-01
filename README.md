@@ -1,5 +1,5 @@
 # Blockchain Risk Scoring
-In collaboration with Lynx Analytcis 
+#### /* In collaboration with Lynx Analytics 
 
 The Blockchain Risk Scoring project taps into open-source information to monitor the risk level of cryptocurrency entities on a daily basis. Open-source information utilised includes news articles from both conventional and crypto-specific sites, as well as social media posts from Reddit and Twitter.  The raw model used by the project is Google's BERT, of which an additional layer is built upon the original neural network to cater to the context of risk scoring. Scored risks, both on a post and entity level, are eventually stored in a centralised database. In the future,  APIs will be created to query into the database for visualization purposes.
 
