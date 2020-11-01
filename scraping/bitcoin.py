@@ -12,6 +12,7 @@ def bitcoin_scrape(entity, start_date, end_date):
     page_number = 1
     continue_search = True
 
+    # continue_search = False when date_time < start_date
     while continue_search:
         # retrieve HTML content
         html = requests.get("https://news.bitcoin.com/page/{}/?s={}".format(page_number, entity))
