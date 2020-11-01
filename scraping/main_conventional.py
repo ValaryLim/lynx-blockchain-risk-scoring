@@ -148,10 +148,10 @@ def combine_samples(positive=[], negative=[]):
 
 #### UNCOMMENT TO RETRIEVE NEGATIVE TEST CASES ####
 # start_date = datetime(2020, 1, 1, 0, 0, 0)
-# end_date = datetime(2020, 6, 30, 23, 59, 59)
+# end_date = datetime(2020, 10, 30, 23, 59, 59)
 # entity_list = list(pd.read_csv("data/entity_list.csv", header=0)["entity"])
-# df = conventional_scrape(entity_list[30:50], start_date, end_date)
-# df.to_csv("data/temp.csv")
+# df = conventional_scrape(entity_list, start_date, end_date)
+# df.to_csv("data/2020_conventional.csv")
 ###################################################
 
 #### UNCOMMENT TO COMBINE SAMPLES ####

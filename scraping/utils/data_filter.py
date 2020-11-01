@@ -41,7 +41,6 @@ def filter_out(sentence):
     return True
 
 
-
 def filter_in(sentence):
     '''
     Output: True if sentence should be kept, False otherwise 
@@ -61,7 +60,6 @@ def filter_in(sentence):
             return True
     
     return False
-
 
 def pre_processing(sentence):
     wordnet_lemmatizer = WordNetLemmatizer()
