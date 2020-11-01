@@ -48,6 +48,8 @@ def google_scrape(entity, start_date, end_date, days_per_period=7):
         # combine result df
         result_df = pd.concat([result_df, temp_df])
 
+    result_df["source_id"] = ""
+
     return result_df
 
 def date_convert(day): 
@@ -68,6 +70,6 @@ def date_convert(day):
 # test case
 # start_date = datetime(2018, 1, 1, 0, 0, 0)
 # end_date = datetime(2019, 12, 20, 23, 59, 59)
-# entity = "ZB.com"
+# entity = "ethereum"
 # df = google_scrape(entity, start_date, end_date)
 # print(df)
