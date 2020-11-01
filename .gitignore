@@ -34,6 +34,6 @@ automation/lynx_data.db
 scoring/.ipynb_checkpoints
 scoring/utils/__pycache__
 scoring/data
-scoring/.ipynb_checkpoints
+
 .gitsecret/keys/random_seed
 !*.secret
