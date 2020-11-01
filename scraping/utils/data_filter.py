@@ -4,7 +4,7 @@ import nltk
 from nltk.stem import WordNetLemmatizer 
 
 def filter_entity(sentence, entity):
-    entity_list = entity.split()
+    entity_list = str(entity).lower().split()
     sentence_list = str(sentence).lower().split()
     found = 0
     for entity_word in entity_list:
@@ -41,7 +41,6 @@ def filter_out(sentence):
     return True
 
 
-
 def filter_in(sentence):
     '''
     Output: True if sentence should be kept, False otherwise 
@@ -61,7 +60,6 @@ def filter_in(sentence):
             return True
     
     return False
-
 
 def pre_processing(sentence):
     wordnet_lemmatizer = WordNetLemmatizer()

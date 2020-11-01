@@ -25,7 +25,7 @@ def theguardian_scrape(entity, start_date, end_date):
     total_pages = 1
     all_results = []
 
-    column_names = ["date_time", "title", "excerpt", "article_url"]
+    column_names = ["date_time", "title", "excerpt", "article_url", "source_id"]
     df = pd.DataFrame(columns = column_names)
 
     try:
@@ -44,6 +44,9 @@ def theguardian_scrape(entity, start_date, end_date):
     # parse results into dataframe
     for result in all_results:
         try:
+            # retrieve source id
+            source_id = result["id"]
+
             # retrieve date
             date_string = result["webPublicationDate"]
             date_time = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ")
@@ -58,15 +61,16 @@ def theguardian_scrape(entity, start_date, end_date):
             # add information to dataframe when entity is in text (self-filter)
             if (entity.lower() in title_text.lower()) or (entity.lower() in excerpt.lower()):
                 df = df.append({"date_time": date_time, "title": title_text, \
-                        "excerpt": excerpt, "article_url": article_url
+                        "excerpt": excerpt, "article_url": article_url, \
+                            "source_id": source_id
                     }, ignore_index=True)
         except:
             continue # if error, skip 
     
     return df
 
-# entity = "Wrapped Ether"
+# entity = "Ethereum"
 # start_date = datetime(2019, 1, 1)
-# end_date = datetime(2019, 3, 30)
+# end_date = datetime(2019, 12, 30)
 # df = theguardian_scrape(entity, start_date, end_date)
 # print(df)
