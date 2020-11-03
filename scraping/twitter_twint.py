@@ -6,6 +6,7 @@ from func_timeout import func_timeout, FunctionTimedOut
 from utils.data_filter import filter_in, filter_out, filter_entity, process_duplicates, enTweet
 from utils.get_coins import get_coins
 
+# get tweet by entity by day
 def get_tweet(entity, cur_day, next_day):
     c = twint.Config() 
     c.Search = entity 
@@ -36,6 +37,8 @@ def twitter_scrape_byentity(entity, start_date, end_date):
 
     if(output_tweets == []):
         return pd.DataFrame()
+    
+    # collect information for the entity
     else: 
         df = pd.DataFrame.from_dict(output_tweets)
         df['entity'] = entity
