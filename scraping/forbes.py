@@ -67,8 +67,8 @@ def forbes_scrape(entity, start_date, end_date):
 
 
 ###############Testing################
-entity = 'binance'
-start_date = datetime(2020, 10, 1)
-end_date = datetime(2020, 10, 25)
-df = forbes_scrape(entity, start_date, end_date)
+# entity = 'binance'
+# start_date = datetime(2020,6, 3)
+# end_date = datetime(2020,8, 30, 23, 59, 59)
+# df = forbes_scrape(entity, start_date, end_date)
 ######################################

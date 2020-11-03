@@ -1,3 +1,12 @@
+'''
+note:
+
+1. run this to install a particular versin of twint:
+    pip install --upgrade git+https://github.com/yunusemrecatalcam/twint.git@twitter_legacy2
+
+2. The func_timeout's error may be printed during running. This does not affect the results.
+
+'''
 import twint
 import pandas as pd
 import datetime as dt
@@ -29,7 +38,6 @@ def twitter_scrape_byentity(entity, start_date, end_date):
         try:
             new_tweets=func_timeout(5, get_tweet, args=(entity, cur_day, next_day))
             output_tweets+=new_tweets
-            #print(output_tweets)
             cur_day = next_day
         except:
             cur_day = next_day
@@ -53,11 +61,9 @@ def twitter_scrape_byentity(entity, start_date, end_date):
 def twitter_scrape(entity_list, start_date, end_date):
     df = pd.DataFrame()
     for entity in entity_list:
-        # print(f'==={entity}===')
+
         try:
             curDf = twitter_scrape_byentity(entity, start_date, end_date)
-            # print('----raw----')
-            # print(curDf)
             df = df.append(curDf)
         except:
             continue
@@ -65,8 +71,6 @@ def twitter_scrape(entity_list, start_date, end_date):
     df['source'] = 'twitter'
     df['coin'] = df['text'].apply(lambda x: get_coins(x))
 
-    #print("----before processing----")
-    #print(df)
 
     # filter out irrelevant data
     mask1 = list(df.apply(lambda x: filter_out(x["text"]), axis=1))
@@ -75,12 +79,13 @@ def twitter_scrape(entity_list, start_date, end_date):
     df = df[mask2].reset_index(drop=True)
     mask3 = list(df['text'].apply(lambda x: enTweet((x))))
     df = df[mask3]
+    # use filter_in only if Twitter has a lot of data for the day
+    # mask4 = list(df.apply(lambda x: filter_in(x["text"]), axis=1)) 
+    # df = df[mask4]
 
     df = process_duplicates(df)
     df['article_date'] = df['date_time']
     df['content'] = df['text']
-    # print("----after processing----")
-    # print(df)
     return df
 
 
