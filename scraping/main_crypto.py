@@ -87,7 +87,7 @@ def crypto_scrape(entity_list, start_date, end_date):
     # i = 0
     # loop through list of entities and scrape all sites for each entity
     for entity in entity_list:
-        # print(i, entity)
+        # print(i, entity)
         entity_df = crypto_scrape_by_entity(entity, start_date, end_date)
         entity_df['entity'] = entity
         df = df.append(entity_df)

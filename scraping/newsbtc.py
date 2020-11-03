@@ -1,4 +1,7 @@
-""" Articles on newsbtc are not sorted by date. """
+""" 
+Articles on newsbtc are not sorted by date 
+and hence excluded from scraping. 
+"""
 
 from bs4 import BeautifulSoup
 import requests

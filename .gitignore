@@ -9,6 +9,7 @@ scraping/data
 scraping/utils/chromedriver
 scraping/utils/__pycache__
 scraping/.ipynb_checkpoints
+scraping/utils/data
 
 sentiment-analysis/utils/fasttext
 sentiment-analysis/bert
@@ -26,6 +27,14 @@ evaluation/data
 evaluation/.ipynb_checkpoints
 
 automation/models
+automation/__pycache__
+automation/utils/data
+automation/utils/__pycache__
+automation/lynx_data.db
+
+scoring/.ipynb_checkpoints
+scoring/utils/__pycache__
+scoring/data
 
 .gitsecret/keys/random_seed
 !*.secret
