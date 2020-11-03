@@ -8,6 +8,7 @@ scraping/api_key.json
 scraping/data
 scraping/utils/chromedriver
 scraping/utils/__pycache__
+scraping/.ipynb_checkpoints
 scraping/utils/data
 
 sentiment-analysis/utils/fasttext
