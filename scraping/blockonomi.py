@@ -1,4 +1,7 @@
-""" Articles on blockonomi are not sorted by date. """
+""" 
+Articles on blockonomi are not sorted by date
+and hence excluded from scraping. 
+"""
 
 import requests
 from bs4 import BeautifulSoup

@@ -3,14 +3,15 @@ from GoogleNews import GoogleNews
 from datetime import datetime, date
 import regex as re
 from dateutil.relativedelta import *
-
-
+import time
 
 def google_scrape(entity, start_date, end_date, days_per_period=7):
     '''
     Scrap (using GoogleNews API) the top 10 headlines of google news on a particular entity, weekly, over a given time range
     Output : Pandas Dataframe with datetime, title, excerpt, domain (news origin), and article url
     '''
+    time.sleep(60) # set timer to wait 60s before scraping (google scraper has limit to scraping)
+    
     # calculate the number of weeks between start and end date (inclusive)
     n_periods = (end_date - start_date).days // days_per_period + 2
 
@@ -48,6 +49,8 @@ def google_scrape(entity, start_date, end_date, days_per_period=7):
         # combine result df
         result_df = pd.concat([result_df, temp_df])
 
+    result_df["source_id"] = ""
+
     return result_df
 
 def date_convert(day): 
@@ -68,6 +71,6 @@ def date_convert(day):
 # test case
 # start_date = datetime(2018, 1, 1, 0, 0, 0)
 # end_date = datetime(2019, 12, 20, 23, 59, 59)
-# entity = "ZB.com"
+# entity = "ethereum"
 # df = google_scrape(entity, start_date, end_date)
 # print(df)

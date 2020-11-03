@@ -13,14 +13,8 @@ from nulltx import nulltx_scrape
 
 # import sys
 # sys.path.insert(1, './utils')
-# from utils.data_filter import filter_out, filter_entity, process_duplicates
-
-import sys
-sys.path.insert(1, '/Users/pengtai.xu/Desktop/Y3S1/Capstone/github/lynx-blockchain-risk-scoring/scraping/utils/')
-
-from data_filter import filter_out, filter_entity, process_duplicates
-
-# means it requires selenium
+from utils.data_filter import filter_out, filter_entity, process_duplicates
+from utils.get_coins import get_coins
 
 # the following are excluded because articles are not sorted by date
 # # from newsbtc import newsbtc_scrape
@@ -34,38 +28,22 @@ def crypto_scrape_by_entity(entity, start_date, end_date):
     # create output dataframe
     column_names = ['domain', 'date_time', 'title', 'excerpt', \
                     'article_url', 'image_url', 'author', 'author_url', \
-                    'category']
+                    'category','coin', 'source_id']
 
     df = pd.DataFrame(columns = column_names)
 
-    # check current date
-    today = datetime.now()
-
-    # time difference
-    time_delta = (today - start_date).days
-
-    # retrieve from sites that require selenium
-    # only for recent articles
-    # if time_delta <= 31:
-    #     # removed: bitcoinist_scrape, 
-    #     functions_lst = [bitcoin_scrape, \
-    #                     bitnewstoday_scrape, coindesk_scrape, \
-    #                     cointelegraph_scrape, cryptonews_scrape, \
-    #                     cryptoslate_scrape, forbes_scrape, \
-    #                     insidebitcoins_scrape, nulltx_scrape]
-
-    # else, scrape only sites that use BeautifulSoup                   
-    #else:
+    # to add bitcoinist, cryptonews, cryptoslate
     functions_lst = [bitcoin_scrape, bitnewstoday_scrape, \
                      insidebitcoins_scrape, nulltx_scrape, \
                      cointelegraph_scrape, coindesk_scrape, \
                      forbes_scrape]
 
-
     for f in functions_lst:
+        # call functions to scrape data from individual websites
         df_website = f(entity, start_date, end_date)
         website_name = f.__name__[: -7]
         df_website['domain'] = website_name
+        # append data to output dataframe
         df = df.append(df_website)
     
     # get text column
@@ -81,24 +59,35 @@ def crypto_scrape_by_entity(entity, start_date, end_date):
     df["entity"] = entity
     df = process_duplicates(df)
 
+    # get coins that are relevant in text 
+    df['coin'] = df['text'].apply(lambda x: get_coins(x))
+
     # reset index
     df = df.reset_index(drop=True)
 
+    # rename dataframe using naming convention in final database
+    df = df.rename({'text':'content', 'article_url':'url', 'domain':'source', \
+                    'date_time':'article_date', 'image_url':'img_link'}, axis = 1)
+
+    # print(df.dtypes)
+         
     return df
 
 
 """ Scrapes all crypto sites when an entity list is queried. """
 
 def crypto_scrape(entity_list, start_date, end_date):
+    # create output dataframe
     column_names = ['domain', 'entity', 'date_time', 'title', 'excerpt', \
                     'article_url', 'image_url', 'author', 'author_url', \
-                    'category']
+                    'category', 'coin', 'source_id']
 
     df = pd.DataFrame(columns = column_names)
 
     # i = 0
+    # loop through list of entities and scrape all sites for each entity
     for entity in entity_list:
-        # print(i, entity)
+        # print(i, entity)
         entity_df = crypto_scrape_by_entity(entity, start_date, end_date)
         entity_df['entity'] = entity
         df = df.append(entity_df)
@@ -109,6 +98,7 @@ def crypto_scrape(entity_list, start_date, end_date):
 
     # reset index
     df = df.reset_index(drop = True)
+
     return df
 
 
@@ -125,4 +115,11 @@ def crypto_scrape(entity_list, start_date, end_date):
 # start_date = datetime(2020, 1, 1)
 # end_date = datetime(2020, 6, 30, 23, 59, 59)
 # data = crypto_scrape(entity_list, start_date, end_date)
+#################################################
+
+#### TESTING CRYPTO SCRAPE FUNCTION ###
+# entity_list = list(pd.read_csv("data/entity_list.csv")['entity'])
+# start_date = datetime(2020, 10, 10)
+# end_date = datetime(2020, 10, 25, 23, 59, 59)
+# df = crypto_scrape_by_entity('huobi', start_date, end_date)
 #################################################

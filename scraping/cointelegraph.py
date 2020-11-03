@@ -6,42 +6,41 @@ import numpy as np
 import json
 
 def cointelegraph_scrape(entity, start_date, end_date):  
-    #Remove all ' ' characters in url
+    # remove all ' ' characters in url
     entity = entity.replace(' ','+')
 
-    #Store data
-    data = {'date_time':[], 'title':[], 'excerpt':[], 'article_url':[], 'image_url':[], 'author':[], 'author_url':[]}
+    # store data
+    data = {'date_time':[], 'title':[], 'excerpt':[], 'article_url':[], 'image_url':[], 'author':[], 'author_url':[], 'source_id': []}
 
-    #retrieve 
+    # retrieve data from url
     url = 'https://cointelegraph.com/search?query=' + entity
     req = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'}).text
     soup = BeautifulSoup(req, 'html.parser')
     token = soup.find("meta",  attrs={'name':"csrf-token"})['content']
     
-
-    #Request and get url
+    # helper function to retrieve data by entity and page number
     def retrieve_data(entity, page_num, token):
-        #Link to retrieve data from
-        r = requests.post("https://cointelegraph.com/api/v1/content/search/result", params=dict(
-        query=entity,
-        page=page_num,
-        _token =token
-        ), headers={'User-Agent': 'Mozilla/5.0'})
-
+        # retrieve data from cointelegraph API
+        r = requests.post("https://cointelegraph.com/api/v1/content/search/result", \
+                          params = dict(query=entity,
+                                        page=page_num,
+                                        _token =token), \
+                          headers={'User-Agent': 'Mozilla/5.0'})
+        # get results in json format
         results = r.json()
         return results['posts']
         
-    
     page_num = 1
     page_data = retrieve_data(entity, page_num, token)
 
-    #Retrieve datetime for the last submission in the page
+    # retrieve datetime for the last submission in the page
     last = end_date
 
     while last >= start_date:
-        
+        # stop if there are no search results
         if page_data == []:
             break
+
         else:
             for article in page_data:
                 if article == None:
@@ -50,6 +49,7 @@ def cointelegraph_scrape(entity, start_date, end_date):
                     date_time =  datetime.strptime(article['published']["date"], "%Y-%m-%d %H:%M:%S.000000")
                     last = date_time
 
+                    # retrieve article information if it is within specified data range
                     if date_time <= end_date and date_time >= start_date: 
                         data['date_time'].append(date_time)
 
@@ -70,7 +70,11 @@ def cointelegraph_scrape(entity, start_date, end_date):
 
                         image = article['retina']
                         data['image_url'].append(image)
-                
+
+                        source_id = article['id']
+                        data['source_id'].append(source_id)
+
+            # scrape next page
             page_num += 1
             page_data = retrieve_data(entity, page_num, token)
 
@@ -78,9 +82,7 @@ def cointelegraph_scrape(entity, start_date, end_date):
     return df
     
 
-
-
-# ###############Testing################
+# ############### testing ################
 # entity = 'Etheremon'
 # start_date = datetime(2020, 8, 1)
 # end_date = datetime(2020, 10, 25, 23, 59, 59)

@@ -8,6 +8,7 @@ def bitnewstoday_scrape(entity, start_date, end_date):
     page_num = 1
     current_date = end_date
 
+    # create output dataframe
     column_names = ["date_time", "title", "excerpt", "article_url", "image_url"]
     df = pd.DataFrame(columns = column_names)
     

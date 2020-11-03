@@ -5,12 +5,12 @@ import time
 
 def coindesk_scrape(entity, start_date, end_date):
 
-    #dictionary to store the relevant data
+    # dictionary to store the relevant data
     data_store = {'date_time':[], 'title':[], 'excerpt':[], 'article_url':[],  'author':[], 'image_url':[]}
 
-    #Request and get url
+    # request and get url
     def retrieve_data(entity, page):
-        #Link to retrieve data from
+        # link to retrieve data from
         url = 'https://www.coindesk.com/wp-json/v1/search?keyword=' + str(entity) + '&page=' + str(page)
         data = requests.get(url).json()
         return data['results']
@@ -18,11 +18,11 @@ def coindesk_scrape(entity, start_date, end_date):
     page = 1
     page_data = retrieve_data(entity, page)
 
-    #Retrieve datetime for the last submission in the page
+    # retrieve datetime for the last submission in the page
     last = end_date
 
     while last >= start_date:
-        
+        # if there are no search results, stop
         if page_data == []:
             break
         else:
@@ -30,6 +30,7 @@ def coindesk_scrape(entity, start_date, end_date):
                 date_time =  datetime.strptime(article['date'], "%Y-%m-%dT%H:%M:%S")
                 last = date_time
 
+                # retrieve relevant information from article
                 if date_time <= end_date and date_time >= start_date: 
                     data_store['date_time'].append(date_time)
 
@@ -46,9 +47,14 @@ def coindesk_scrape(entity, start_date, end_date):
                     author = article['author'][0]['name']
                     data_store['author'].append(author)
 
-                    image = article['images']['images']['desktop']['src']
-                    data_store['image_url'].append(image)
-                
+                    # try except block for articles without image url
+                    try:
+                        image = article['images']['images']['desktop']['src']
+                        data_store['image_url'].append(image)
+                    except:
+                        data_store['image_url'].append('')
+            
+            # increment page number
             page += 1
             page_data = retrieve_data(entity, page)
 
@@ -56,15 +62,9 @@ def coindesk_scrape(entity, start_date, end_date):
     return df
 
 
-###############Testing################
+############### Testing ################
 # entity = 'binance'
 # start_date = datetime(2020, 7, 28)
 # end_date = datetime(2020, 9, 20,23,59,59)
 # df = coindesk_scrape(entity, start_date, end_date)
 # ######################################
-
-
-# df.to_csv(r'/Users/JX/Desktop/coindesk.csv')
-
-
-
