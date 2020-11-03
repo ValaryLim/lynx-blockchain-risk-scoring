@@ -7,7 +7,6 @@ from datetime import datetime, timedelta
 from utils.data_filter import filter_in, filter_out, filter_entity, process_duplicates
 from utils.get_coins import get_coins
 
-
 def reddit_scrape_by_entity(entity, start_date, end_date):
 
     api = PushshiftAPI()

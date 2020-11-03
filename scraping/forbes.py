@@ -20,7 +20,6 @@ def forbes_scrape(entity, start_date, end_date):
 
         url = 'https://www.forbes.com/simple-data/search/more/?start=' + str(start_page) + '&sort=recent&q=' + entity
         page = requests.get(url).text
-        print(page)
         soup = BeautifulSoup(page, 'html.parser')
         
         results = soup.find_all('article')
