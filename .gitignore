@@ -35,5 +35,7 @@ scoring/.ipynb_checkpoints
 scoring/utils/__pycache__
 scoring/data
 
+demo/data
+
 .gitsecret/keys/random_seed
 !*.secret

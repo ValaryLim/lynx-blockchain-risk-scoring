@@ -1,5 +1,6 @@
 # import packages
 import dash
+import dash_table
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
 import dash_html_components as html
@@ -55,14 +56,24 @@ sidebar = html.Div(
 )
 
 #### CONTENT ##################################################################
+# retrieve entity list
+entity_list = list(pd.read_csv('data/entity_list.csv').entity)
+entity_list.sort() # sort in alphabetical order
 # entity input
 entity_input = html.Div([
     dbc.Label("Entity Name", className="p", style={"font-weight": "600"}),
     html.Br(),
-    dbc.Input(id="entity-input", placeholder="Type entity name here", \
-        type="text", bs_size="md", className="mb-3", \
-            style={"font-size": "14px"})
-], style={'width': '20%', 'display': 'inline-block', 'margin-right': 250})
+    dcc.Dropdown(
+        id='entity-input',
+        placeholder="Select entity name here", 
+        options=[
+            {'label': entity, 'value': entity} for entity in entity_list
+        ],
+        style={"font-size": "14px"}, 
+        className="mb-3",
+    ),
+    html.Div(id='dd-output-container')
+], style={'width': '30%', 'display': 'inline-block', 'margin-right': 30})
 
 # date input
 date_input = html.Div([
@@ -70,22 +81,25 @@ date_input = html.Div([
     html.Br(),
     dcc.DatePickerRange(
         id="date-input",
-        style={"font-size": "10px"},
+        style={"font-size": "14px"},
         min_date_allowed = '2020-01-01',
         max_date_allowed = datetime.today(),
-        initial_visible_month = datetime.today()
+        initial_visible_month = datetime.today(),
+        className="mb-3"
     )
-], style={'width': '40%', 'display': 'inline-block', 'margin-right': 100})
+], style={'width': '40%', 'display': 'inline-block', 'margin-right': 20})
 
 # submit button
-submit_button = dbc.Button("Submit", color="dark", block=True, id="submit", style={'width': '10%', 'display': 'inline-block'})
+submit_button = html.Div([
+    dbc.Label("Button", className="p", style={"color": "white", "font-weight": "600"}), # for alignment
+    html.Br(),
+    dbc.Button("Submit", color="dark", block=False, id="submit", className="mb-3")
+], style={'width': '20', 'display': 'inline-block'})
 
 content = html.Div(
     [
 
-        entity_input,
-        date_input,
-        submit_button,
+        dbc.Row([entity_input, date_input, submit_button]),
         html.Hr(),
         html.Br(),
         html.Br(),
@@ -107,69 +121,86 @@ app.layout = html.Div([dcc.Location(id="url"), sidebar, \
     dbc.Spinner(content, spinner_style={"width": "3rem", "height": "3rem"})])
 
 #### CALLBACKS ################################################################
-def generate_table(name, dataframe, max_rows=10):
+
+def generate_table(name, dataframe):
     '''
     generate table dynamically from dataframe
     '''
-    return html.Div([html.H5(name),
-        dbc.Table([
-            html.Thead(
-                html.Tr([html.Th(col) for col in dataframe.columns])
-            ),
-            html.Tbody([
-                html.Tr([
-                    html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
-                ]) for i in range(min(len(dataframe), max_rows))
-            ])
-        ])
-    ])
+    return html.Div([html.Br(),
+        html.H5(name),
+        dbc.Label(f"Total Articles Retrieved: {len(dataframe)}", 
+                    style={"font-weight": "600", "font-size": "14px"}),
+        html.Br(),
+        html.Div(
+            dash_table.DataTable(
+                columns=[
+                    {"name": i, "id": i, "selectable":True} for i in dataframe.columns
+                ],
+                data=dataframe.to_dict('records'),
+                style_data={'whiteSpace': 'normal', 'height': 'auto'},
+                style_cell={
+                    'height': 'auto',
+                    # all three widths are needed
+                    'minWidth': '80px', 'width': '150px', 'maxWidth': '180px',
+                    'whiteSpace': 'normal',
+                    'textAlign': 'left',
+                    'fontSize': 12, 
+                    'font-family':'Verdana',
+                },
+                sort_action='native',
+                sort_mode='single',
+                sort_by=[],
+                page_size=5,
+                css=[{'selector': '.row', 'rule': 'margin: 0'}],
+            ), 
+            style={})
+])
 
-def generate_graph(crypto_df, reddit_df, twitter_df, start_date, end_date):
+def generate_graph(entity, start_date, end_date):
+    '''
+    generate graph of risk score over time for each entity
+    with breakdown by news source
+    '''
 
-    df1 = get_count_by_date(crypto_df, start_date, end_date)
-    df2 = get_count_by_date(reddit_df, start_date, end_date)
-    df3 = get_count_by_date(twitter_df, start_date, end_date)
+    # read csv of risk data
+    sample_risk_data = pd.read_csv("data/entity_risk_score_2020.csv")
+    # extract relevant date and entity
+    sample_risk_data = sample_risk_data.loc[sample_risk_data['entity']==entity.lower()]
+    sample_risk_data = sample_risk_data[(sample_risk_data.date >= start_date) & (sample_risk_data.date <= end_date)]
 
-    df1['source_type'] = 'crypto'
-    df2['source_type'] = 'reddit'
-    df3['source_type'] = 'twitter'
+    # transform data
+    graph_data = pd.DataFrame(columns=['date', 'score', 'source'])
 
-    result = pd.concat([df1, df2], ignore_index=True, sort=False)
-    result = pd.concat([result, df3], ignore_index=True, sort=False)
-    result['date'] = result['index'].dt.date
+    # mean score over time
+    mean = sample_risk_data[['score']].mean(axis=1)
 
-    fig = px.line(result, x= 'index', y='label', color='source_type')
-    
+    for col in ['news_score', 'reddit_score', 'twitter_score', 'score']:
+        source_data = sample_risk_data[['date', col]]
+        if col == 'score':
+            source_data['source'] = 'overall'
+        else:
+            source_data['source'] = col
+        source_data.columns=['date', 'score', 'source']
+        graph_data = graph_data.append(source_data, ignore_index=True)
+
+    # plot graph
+    fig = px.line(graph_data, x='date', y='score', color='source')
+
     fig.update_layout(
-        title="Number of posts/articles labelled high-risk over time",
+        # title="Risk Score Over Time",
         title_x=0.5,
         xaxis_title="Date",
-        yaxis_title="Count",
-        legend_title="Source"
+        yaxis_title="Risk Score (in %)",
+        legend_title="Source",
     )
-    
+
     count_graph = html.Div([
-        html.H5("Count of Risky Articles over Time"),
+        html.H5("Risk Score over Time"),
         dcc.Graph(figure=fig)
     ]
     )
-    
+
     return count_graph
-
-def get_count_by_date(df, start_date, end_date):
-
-    #Group data by date and find the number of posts predicted as risky 
-    df2 = df.groupby(['date']).sum()
-    df = df.drop(['date'], axis = 1)
-
-    #Get all date within range and fill dates with no data with 0 
-    idx = pd.date_range(start_date, end_date)
-    df2.index =  pd.DatetimeIndex(df2.index)
-    df2 = df2.reindex(idx, fill_value=0) 
-
-    df2 = df2.reset_index()
-    return df2
-
 
 # when submit button is pressed, run query
 @app.callback(
@@ -194,10 +225,10 @@ def render_page_content(n_clicks, entity, start_date, end_date):
     end_date_datetime = datetime.strptime(end_date, "%Y-%m-%d")
     end_date_datetime = end_date_datetime.replace(hour=23, minute=59)
 
-    # generate score display
+    ##### SCORE DISPLAY #####
     score_display = html.Div([
         dbc.Label("Open Source Information", className="p", style={"font-size": "30px", "font-weight": "600", 'display': 'inline-block', 'margin-right': 50}),
-        dbc.Col(html.Div("Overall score"), style={"font-size": "15px", "font-weight": "600", 'width': '10%', 'display': 'inline-block', "background-color": "#D77560", "height": "30px", "border-radius": "25px", "text-align": "center"}),
+        dbc.Label(("Overall Score: 100"), className="p", style={"font-size": "15px", "font-weight": "600", 'width': '20%', 'display': 'inline-block', "background-color": "#D77560", "height": "30px", "border-radius": "25px", "text-align": "center"}),
         html.Br(),
         html.Br(),
         dbc.Row(
@@ -210,35 +241,42 @@ def render_page_content(n_clicks, entity, start_date, end_date):
     ]
     )
 
-    # generate graph
-    count_graph = html.Div([
-        html.H5("Count of Risky Articles over Time")]
-    )
-    sample_data = pd.read_csv("sample_data.csv", index_col=0)
+    ##### GRAPH #####
+    count_graph = html.Div(generate_graph(entity, str(start_date),str(end_date)))
+
+    ##### TABLE #####
+    sample_data = pd.read_csv("data/all_predicted_2020.csv", index_col=0)
     
     # Process imported dataframe
     # Get datetime format for df date and filter for range
     sample_data['article_date'] = pd.to_datetime(sample_data.article_date)
     
     # Filter by entity and date range
-    df = sample_data[(sample_data.entity == entity) & (sample_data.article_date >= start_date) & (sample_data.article_date <= end_date)]
-    df['label'] = df['probability_risk'].apply(lambda x: 1 if x >= 0.5 else 0)
+    df = sample_data.copy()
+    df['entity'] = df['entity'].str.lower()
+    df = df.loc[df['entity'] == entity.lower()]
+    df = df.loc[(df['article_date'] >= start_date_datetime) & (df['article_date'] <= end_date_datetime)]    
+    
+    # format data
     df['date'] = df['article_date'].dt.date
-    crypto_df = df[(df.source!="twitter") & (df.source!="reddit")]
+    df = df.round({'predicted_risk': 2})
+    crypto_df = df[(df.source!="Twitter") & (df.source!="reddit")]
     reddit_df = df[df.source=="reddit"]
-    twitter_df = df[df.source=="twitter"]
+    twitter_df = df[df.source=="Twitter"]
 
-    count_graph = generate_graph(crypto_df, reddit_df, twitter_df, str(start_date),str(end_date))
+    # rename columns
+    columns = {"date": "Date", "content": "Content", \
+                "url": "URL", "predicted_risk": "Risk Score"}
 
-    # slice dataframe
-    crypto_df = crypto_df[["article_date", "content", "predicted_risk"]].sort_values("predicted_risk", ascending = False)
-    reddit_df = reddit_df[["article_date", "content", "predicted_risk"]].sort_values("predicted_risk", ascending = False)
-    twitter_df = twitter_df[["article_date", "content", "predicted_risk"]].sort_values("predicted_risk", ascending = False)
+    # slice dataframe to retrieve relevant information to display
+    crypto_df = pd.DataFrame(crypto_df[columns.keys()].sort_values("predicted_risk", ascending = False))
+    reddit_df = pd.DataFrame(reddit_df[columns.keys()].sort_values("predicted_risk", ascending = False))
+    twitter_df = pd.DataFrame(twitter_df[columns.keys()].sort_values("predicted_risk", ascending = False))
 
-    # tables
-    crypto_table = generate_table("Conventional and Cryptonews", crypto_df)
-    reddit_table = generate_table("Reddit", reddit_df)
-    twitter_table = generate_table("Twitter", twitter_df)
+    # generate tables
+    crypto_table = generate_table("Conventional and Cryptonews", crypto_df.rename(columns=columns))
+    reddit_table = generate_table("Reddit", reddit_df.rename(columns=columns))
+    twitter_table = generate_table("Twitter", twitter_df.rename(columns=columns))
 
     return (score_display, count_graph, crypto_table, reddit_table, twitter_table)
 
