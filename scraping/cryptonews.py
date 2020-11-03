@@ -53,6 +53,7 @@ def cryptonews_scrape(entity, start_date, end_date):
                 if date_time <= end_date and date_time >= start_date:
                     ## Store info in dataframe if it lies in the date range
                     data['date_time'].append(date_time)
+                    #print("article time ", date_time)
 
                     # retrieve url and text
                     article_module = article.find("h4")

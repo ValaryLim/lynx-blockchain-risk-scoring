@@ -54,12 +54,15 @@ def cryptoslate_scrape(entity, start_date, end_date):
                     date_time = datetime.now() - dt.timedelta(days=int(date_info.split(" ")[1])*7)
                 elif date_info.find("month") != -1:
                     date_time = datetime.now() - dt.timedelta(days=int(date_info.split(" ")[1])*30)
+                else:
+                    date_time = datetime.now() - dt.timedelta(days=int(date_info.split(" ")[1])*30*12)
 
                 last = date_time # update current date
 
                 if date_time <= end_date and date_time >= start_date:
                     ## Store info in dataframe if it lies in the date range
                     data['date_time'].append(date_time)
+                    #print("article time ", date_time)
 
                     # retrieve article id
                     article_id = article.find('article')['id']

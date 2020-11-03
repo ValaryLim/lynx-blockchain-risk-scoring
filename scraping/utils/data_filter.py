@@ -2,6 +2,7 @@ import string # for punctuation
 import math
 import nltk
 from nltk.stem import WordNetLemmatizer 
+from langdetect import detect
 
 def filter_entity(sentence, entity):
     entity_list = str(entity).lower().split()
@@ -114,4 +115,5 @@ def enTweet(sentence):
         else:
             return False
     except:
+        print('exception!')
         return False
