@@ -12,6 +12,11 @@ A more detailed breakdown of the project can be seen in the flowchart below.<br/
 
 ## Getting Started
 
+This project should be run on Python 3.7. A conda environment can be created using the following:
+```bash
+conda create -n myenv python=3.7
+```
+
 The end-user mainly makes use of the automation branch of the GitHub repository. A **requirements.txt** file is provided for the specification of the packages used in the project. The user can run the following command to install the packages.
 
 ```bash
