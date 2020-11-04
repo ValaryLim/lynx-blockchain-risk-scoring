@@ -103,5 +103,4 @@ def enTweet(sentence):
         else:
             return False
     except:
-        print('exception!')
         return False

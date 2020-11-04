@@ -56,13 +56,13 @@ Here is a breakdown of the other folders,
 <br>
 
 
-|     Folder           |Function                         |
-|----------------------|---------------------------------|
-|**scraping**|Scraping scripts for open source information, including news, Reddit and Twitter data|
-| **sentiment-analysis**|Models attempted for risk scoring, including Bert, FastText, word2vec and Vader|
-|**evaluation**|Evaluation of the better performing models - Bert, Roberta and word2vec on 2020 data|
-|**scoring**|Methods to assign risk scores to entities based on output from the model|
-|**demo**|A sample visualisation built using python dash |
+|     Folder           |Function                                                                             |
+|----------------------|-------------------------------------------------------------------------------------|
+|**scraping**          |Scraping scripts for open source information, including news, Reddit and Twitter data|
+|**sentiment-analysis**|Models attempted for risk scoring, including Bert, FastText, word2vec and Vader      |
+|**evaluation**        |Evaluation of the better performing models - Bert, Roberta and word2vec on 2020 data |
+|**scoring**           |Methods to assign risk scores to entities based on output from the model             |
+|**demo**              |A sample visualisation built using python dash                                       |
 
 
 scraping
@@ -104,8 +104,8 @@ We compare the percentage of posts being scored as high risk for each entity and
 
 We can then compare to the real hacks reported for Binace,
 
-> 2020-03-11 - Binance Users in Turkey May Have Been Compromised, Many Receive Phishing SMS Messages
-> 2020-04-07 - Binance Accused of Stealing $1 Million Worth of Assets: Company Denies Everything but Class Action Underway
+> 2020-03-11 - Binance Users in Turkey May Have Been Compromised, Many Receive Phishing SMS Messages\
+> 2020-04-07 - Binance Accused of Stealing $1 Million Worth of Assets: Company Denies Everything but Class Action Underway\
 > 2020-04-29 - Binance ddos attack
 
 This preliminary analysis on empirical performance is further developed with a precisely define risk scoring method across entities.
