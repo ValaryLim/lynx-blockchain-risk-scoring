@@ -188,4 +188,6 @@ def deploy(filepath):
 # eval_start_date = datetime(2020,9,28)
 # eval_end_date = datetime(2020,9,28,23,59,59)
 
-# train(filepath, train_start_date, train_end_date, eval_start_date = eval_start_date, eval_end_date = eval_end_date, deploy = False)
+# train(filepath, train_start_date, train_end_date, eval_start_date = eval_start_date, eval_end_date = eval_end_date)
+# if results satisfactory for deployment
+# deploy(filepath)
