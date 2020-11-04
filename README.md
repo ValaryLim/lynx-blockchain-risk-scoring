@@ -56,7 +56,7 @@ Here is a breakdown of the other folders,
 <br>
 
 
-|     Folder           |Function                                                                             |
+|Folder                |Function                                                                             |
 |----------------------|-------------------------------------------------------------------------------------|
 |**scraping**          |Scraping scripts for open source information, including news, Reddit and Twitter data|
 |**sentiment-analysis**|Models attempted for risk scoring, including Bert, FastText, word2vec and Vader      |
