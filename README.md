@@ -2,7 +2,7 @@
 #### *In collaboration with Lynx Analytics 
 
 
-<br/>The Blockchain Risk Scoring project taps into open-source information to monitor the risk level of cryptocurrency entities on a daily basis. Open-source information utilised includes news articles from both conventional and crypto-specific sites, as well as social media posts from Reddit and Twitter.  The raw model used by the project is Google's BERT, of which an additional layer is built upon the original neural network to cater to the context of risk scoring. Scored risks, both on a post and entity level, are eventually stored in a centralised database. In the future,  APIs will be created to query into the database for visualization purposes.
+<br/>The Blockchain Risk Scoring project taps into open-source information to monitor the risk level of cryptocurrency entities on a daily basis. Open-source information utilised includes news articles from both conventional and crypto-specific sites, as well as social media posts from Reddit and Twitter.  While four different models were attempted, the final model used by the project is RoBERTa ([Robustly Optimized BERT Pretraining Approach](https://arxiv.org/abs/1907.11692)). We also built an additional layer upon the original neural network to cater to the context of risk scoring. Scored risks, both on a post and entity level, are eventually stored in a centralised database. In the future,  APIs will be created to query into the database for visualization purposes.
 
 A more detailed breakdown of the project can be seen in the flowchart below.<br/>
 
@@ -21,7 +21,7 @@ pip install -r requirements.txt
 
 ## Usage
 
-The entire data retrieval, risk scoring, and data storage pipeline of the project have been automated in the **auto_pipe.py** file. The user simply specifies the list of entities and the time period for the get_data function to complete the entire process.  For example,
+The entire data retrieval, risk scoring, and data storage pipeline of the project have been automated in the **auto_pipe.py** file. The user simply specifies the list of entities and the time period for the get_data_all function to complete the entire process. For example,
 
 ```python
 from datetime import datetime
@@ -29,9 +29,9 @@ from datetime import datetime
 entities = ['binance','bitfinex', 'huobi', 'okex', 'upbit']
 start = datetime(2020,9,1)
 end = datetime(2020,10,26)
-get_data(entities, start, end)
+get_data_all(entities, start, end)
 ```
-<br/>The **auto_pipe.py** file also provides a **train** function for the model to be re-trained when performance drops (or on a monthly basis depending on whichever is more suitable).  The **train** method automatically retrieves data from the database for re-training. The only parameter to be specified is the filepath for the updated model to be stored at. <br/>
+<br/>The **auto_pipe.py** file also provides a **train** function for the model to be re-trained when performance drops (or on a monthly basis depending on whichever is more suitable).  The **train** method automatically retrieves data from the database for re-training. Parameters that the **train** functions accepts are specified under the function itself. <br/>
 
 
 
