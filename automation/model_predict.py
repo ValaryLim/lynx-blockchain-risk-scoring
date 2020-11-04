@@ -50,11 +50,15 @@ def model_predict(text):
     return pred, prob_risk, pred_risk
 
 
-# Placeholder
 def predicted_risk(prob_risk):
-    risk = 100 * prob_risk
+    '''
+    Calculate and output the predicted risk score of article/post
 
-    if risk > 0.5:
-        return risk
-    else:
-        return 0
+    Input: 
+        prob_risk(arr): array consisting of probability of high risk
+    Output:
+        risk(float): predicted risk 
+
+    '''
+    risk = 100 * prob_risk
+    return risk

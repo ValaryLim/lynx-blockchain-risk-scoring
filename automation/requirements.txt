@@ -1,6 +1,7 @@
 requests==2.24.0
 beautifulsoup4==4.9.3
 crypto_news_api==2.3.1
+func_timeout==4.3.5
 GoogleNews==1.4.1
 langdetect==1.0.8
 nltk==3.5
