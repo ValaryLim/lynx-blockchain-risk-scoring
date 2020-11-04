@@ -12,11 +12,9 @@ def to_binary(prob):
 def model_train(data, output_dir='models/'):
     '''
     Trains a roberta model based on input data.
-
     Inputs: 
       data (pd.DataFrame): with columns content (text), ground_truth_risk (label), probability_risk.
       output_dir (str): output path or directory to save model.
-
     Output:
       None, model will already be saved in specified output directory.
     '''

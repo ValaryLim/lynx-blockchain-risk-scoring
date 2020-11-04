@@ -3,6 +3,7 @@ import math
 import nltk
 from nltk.stem import WordNetLemmatizer 
 from langdetect import detect
+import pandas as pd
 
 def filter_entity(sentence, entity):
     entity_list = str(entity).lower().split()
@@ -18,14 +19,7 @@ def filter_out(sentence):
     Output: True if sentence should be kept, False otherwise 
     '''
     # set of words to filter out (lemmatized)
-    filter_set = {'price', 'rat', 'fee', 'liquidity', 'trade', 'trade', 'invest', 'value',\
-        'update', 'winner', 'history', 'competition', 'review', 'welcome', 'bull', 'bear', \
-        'perform', 'cost', 'discount', 'spend', 'perform', 'potential', 'interest', 'success',\
-        'prediction', 'forecast', 'top', 'return', 'gift', 'demand', 'trend', 'shop', 'buy',\
-        'brief', 'tip', 'complete', 'expand', 'improve', 'retail', 'explain', 'investment', \
-        'sentiment', 'rewind', 'trader', 'trade', 'innovation', 'joke', 'tax', 'pros', 'rewind', \
-        'hype', 'how', 'war', 'drop', 'falling', 'inflation', 'remedy', 'recover', 'introduction',\
-        'investors', 'dip', 'legalize', 'regulate', 'launch', 'support', 'grant', 'arbitrage'}
+    filter_set = set(pd.read_csv(r'../scraping/utils/data/filter_list.csv')['filter_out'].unique())
 
     # if there exist no sentence (excerpt), return True
     if type(sentence) != str:
@@ -47,11 +41,7 @@ def filter_in(sentence):
     Output: True if sentence should be kept, False otherwise 
     '''
     # set of words to filter out (lemmatized)
-    filter_set = {'unsecure','insecure', 'secure', 'security', 'breach', 'hack', 'compromise',\
-        'steal', 'fraud', 'scam', 'heist', 'attack', 'malware', 'suspicious', 'cryptojacking',\
-        'launder', 'allegation','raid', 'emergency', 'suspect', 'risk', 'chaos', 'assault',\
-        'theft', 'criticism','shutdown', 'down', 'disable', 'regulate', 'phish', 'illegal',\
-        'fake', 'suspend','vulnerable', 'leak', 'fraudster'}
+    filter_set = set(pd.read_csv(r'../scraping/utils/data/filter_list.csv')['filter_in'].unique())
 
     # pre-process sentence
     processed_sentence = pre_processing(sentence)
@@ -113,5 +103,4 @@ def enTweet(sentence):
         else:
             return False
     except:
-        print('exception!')
         return False

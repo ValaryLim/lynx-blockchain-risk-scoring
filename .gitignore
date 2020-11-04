@@ -31,10 +31,12 @@ automation/__pycache__
 automation/utils/data
 automation/utils/__pycache__
 automation/lynx_data.db
+automation/data
 
 scoring/.ipynb_checkpoints
 scoring/utils/__pycache__
 scoring/data
+scoring/utils/data
 
 .gitsecret/keys/random_seed
 !*.secret
