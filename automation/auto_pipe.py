@@ -76,14 +76,12 @@ def get_data(entity, start_date, end_date):
 
 
 ############# Testing #############
-#get_data('binance', datetime(2020,9,1), datetime(2020,10,26))
+# get_data('binance', datetime(2020,9,1), datetime(2020,10,26))
 
 # entity_list = pd.read_csv('../automation/utils/data/entity_list')['entity'].tolist()
 # for entity in entity_list:
 #     retrieve_data(entity, start_date, end_date)
 ###################################
-
-
 
 
 def get_overall_risk(start_date, end_date):
@@ -183,11 +181,11 @@ def deploy(filepath):
 # get_data_all(entity_list, datetime(2020,10,31), datetime(2020,11,2,23,59,59))
 
 # filepath = '../automation/models/new_test_model'
-# train_start_date = datetime(2020,8,31)
-# train_end_date = datetime(2020,8,31,23,59,59)
-# eval_start_date = datetime(2020,9,28)
-# eval_end_date = datetime(2020,9,28,23,59,59)
+# train_start_date = datetime(2020,10,1)
+# train_end_date = datetime(2020,10,25,23,59,59)
+# eval_start_date = datetime(2020,10,26)
+# eval_end_date = datetime(2020,10,30,23,59,59)
 
 # train(filepath, train_start_date, train_end_date, eval_start_date = eval_start_date, eval_end_date = eval_end_date)
-# if results satisfactory for deployment
+# # if results satisfactory for deployment
 # deploy(filepath)
