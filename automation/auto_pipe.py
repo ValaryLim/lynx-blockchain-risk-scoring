@@ -76,7 +76,7 @@ def get_data(entity, start_date, end_date):
 
 
 ############# Testing #############
-#get_data('binance', datetime(2020,9,1), datetime(2020,10,26))
+get_data('binance', datetime(2020,9,1), datetime(2020,10,26))
 
 # entity_list = pd.read_csv('../automation/utils/data/entity_list')['entity'].tolist()
 # for entity in entity_list:
