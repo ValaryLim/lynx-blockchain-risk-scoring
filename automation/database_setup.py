@@ -4,14 +4,13 @@ import sqlite3
 Set up sqlite database for storage of retrieved data
 '''
 
-
 conn = sqlite3.connect(r"../automation/lynx_data.db")
 c = conn.cursor()
 
 c.execute('''CREATE TABLE POST_DATA(
         uid TEXT PRIMARY KEY NOT NULL,
         source_id TEXT,
-        source VARCHAR(40) NOT NULL,
+        source VARCHAR(40),
         article_date DATETIME,
         content TEXT NOT NULL,
         url TEXT NOT NULL, 

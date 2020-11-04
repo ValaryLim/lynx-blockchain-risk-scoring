@@ -3,78 +3,191 @@ import pandas as pd
 import numpy as np
 import sqlite3
 
-#Import data retrieval function
 from retrieve_data import retrieve_data
 from model_train import model_train
-from entity_risk_score import entity_risk_score
+from model_eval import model_eval
+
+# import risk scoring function
+import sys
+sys.path.insert(1, '../scoring/utils')
+from scoring_automated import entity_risk_score
+sys.path.remove('../scoring/utils')
+
+# for dashboard
+from update_csv import update_csv
 
 
-def get_data(entity_list, start_date, end_date):
+def get_data_all(entity_list, start_date, end_date):
     '''
+    Retrieve and store retrieved data on all entities in database
+
     Input:
-        entity_list (list):
-        start_date (datetime):
-        end_date (datetime):
+        entity (string): name of entity to query
+        start_date(datetime): date to start data retrieval
+        end_date(datetime): date to end data retrieval
+    '''
+    # Get all data into database
+    for entity in entity_list:
+        print(entity)
+        get_data(entity, start_date, end_date)
+    
+    # Get overall risk score after running the query
+    get_overall_risk(start_date, end_date)
+
+    return 
+
+
+
+def get_data(entity, start_date, end_date):
+    '''
+    Retrieve and store data on entity in database
+
+    Input:
+        entity (string): name of entity to query
+        start_date(datetime): date to start data retrieval
+        end_date(datetime): date to end data retrieval
     '''
 
     #Connect to database
     conn = sqlite3.connect('lynx_data.db')
     c = conn.cursor()
 
-    # Retrieve data from web scraping and store in database
-    # for entity:
-    #     df = retrieve_data(entity_list, start_date, end_date)
-    #     score = 
-    #     score["entity"] = entity
+    # Scrape data and predict
+    df = retrieve_data(entity, start_date, end_date)
     
-    df = retrieve_data(entity, start, end)
-    
-    
-    #df.to_csv(r'~/Desktop/test.csv', index = False)
-
     #Append data into table
     df.to_sql('POST_DATA', conn, if_exists='append', index = False)
+    update_csv(df, '../automation/data/all_predicted_2020.csv')
 
-    entity_df = entity_risk_score(df)
+    print('joined to df')
+
+    #Get dataframe of risk scores by date and entity
+    entity_df_tem = entity_risk_score(df, entity, start_date, end_date)
+    entity_df = entity_df_tem[["date", "entity", "score"]]
+
+    #Store data into table in database
     entity_df.to_sql('ENTITY_DATA', conn, if_exists='append', index = False)
+    update_csv(entity_df_tem, '../automation/data/entity_risk_score_2020.csv')
 
+    #Close connection
     conn.close()
 
     return 
 
 
 ############# Testing #############
-#get_data(['binance','bitfinex', 'huobi', 'okex', 'upbit'], datetime(2020,9,1), datetime(2020,10,26))
+get_data('binance', datetime(2020,9,1), datetime(2020,10,26))
+
+# entity_list = pd.read_csv('../automation/utils/data/entity_list')['entity'].tolist()
+# for entity in entity_list:
+#     retrieve_data(entity, start_date, end_date)
 ###################################
 
 
-def train(filepath):
+
+
+def get_overall_risk(start_date, end_date):
+    '''
+    Query DB1, calculate and store overall entity risk score in DB2
+
+    Input:
+        start_date(datetime): date to start data retrieval
+        end_date(datetime): date to end data retrieval
+    '''
+
+    #Connect to database
+    conn = sqlite3.connect('lynx_data.db')
+    c = conn.cursor()
+
+    # Get all data within date range from database (POST_DATA table) as dataframe 
+    c.execute('''
+            SELECT * FROM POST_DATA
+            WHERE (article_date BETWEEN ? AND ?)
+            ''', (start_date, end_date))
+
+    df = pd.DataFrame(c.fetchall(), columns = list(map(lambda x: x[0], c.description)))  
+
+    df = df.fillna("")
+
+    #Get dataframe of risk scores by date and entity
+    entity_df_tem = entity_risk_score(df, entity="overall", start_date=start_date, end_date=end_date)
+    entity_df = entity_df_tem[["date", "entity", "score"]]
+
+    #Store data into table in database
+    entity_df.to_sql('ENTITY_DATA', conn, if_exists='append', index = False)
+    update_csv(entity_df_tem, '../automation/data/entity_risk_score_2020.csv')
+
+    #Close connection
+    conn.close()
+
+    return 
+
+
+
+def train(filepath, train_start_date, train_end_date, eval_start_date = None, eval_end_date = None):
     '''
     Retrain model and update the model used in model_predict
 
     Input:
         filepath (str): path to store new model
+        train_start_date (datetime): date to start retrieivng data from database for training
+        train_end_date (datetime): date to end retrieivng data from database for training
+        eval_start_date (datetime): date to start retrieivng data from database for evaluation
+        eval_end_date (datetime): date to end retrieivng data from database for evaluation
     '''
+
     conn = sqlite3.connect('lynx_data.db')
     c = conn.cursor()
 
-    # Get all data from database as dataframe
+    # Convert datetime object to string for parsing into database query
+    train_start = train_start_date.strftime('%Y-%m-%d %H:%M:%S')
+    train_end = train_end_date.strftime('%Y-%m-%d %H:%M:%S')
+
+    # Get all data within date range from database (POST_DATA table) as dataframe 
     c.execute('''
-        SELECT * FROM POST_DATA
-        ''')
+            SELECT * FROM POST_DATA
+            WHERE (article_date BETWEEN ? AND ?)
+            ''', (train_start, train_end))
 
-    df = pd.DataFrame(c.fetchall(), columns = ['uid', 'source_id', 'source','article_date','content', 'url', 'count',\
-                    'img_link','entity','author','ground_truth_risk','probability_risk','predicted_risk','coin'])  
+    df = pd.DataFrame(c.fetchall(), columns = list(map(lambda x: x[0], c.description))) 
+
+    conn.close()
+
     
-    #Retrain model
+    # Retrain model
     model_train(df, output_dir= filepath)
-    
-    #Modify the model being used in model_predict through curr_model.txt
-    path = open("../automation/curr_model.txt", "w")
-    path.write(filepath)
-    path.close()
 
+    # Evaluate metrics 
+    if eval_start_date != None or eval_end_date != None:
+        model_eval(eval_start_date, eval_end_date, filepath)
 
     return 
 
 
+def deploy(filepath):
+    '''
+    Deploy model 
+
+    Input:
+        filepath (str): path to new model to be deployed
+    '''
+    path = open("../automation/curr_model.txt", "w")
+    path.write(filepath)
+    path.close()
+
+    return 
+
+
+#################### Testing ####################
+# entity_list = pd.read_csv(r'./utils/data/entity_list.csv')['entity'].tolist()
+# get_data_all(entity_list, datetime(2020,10,31), datetime(2020,11,2,23,59,59))
+
+# filepath = '../automation/models/new_test_model'
+# train_start_date = datetime(2020,8,31)
+# train_end_date = datetime(2020,8,31,23,59,59)
+# eval_start_date = datetime(2020,9,28)
+# eval_end_date = datetime(2020,9,28,23,59,59)
+
+# train(filepath, train_start_date, train_end_date, eval_start_date = eval_start_date, eval_end_date = eval_end_date)
+# if results satisfactory for deployment
+# deploy(filepath)
