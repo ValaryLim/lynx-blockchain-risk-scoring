@@ -1,9 +1,17 @@
+'''
+note:
+
+1. run this to install a particular versin of twint:
+    pip install --upgrade git+https://github.com/yunusemrecatalcam/twint.git@twitter_legacy2
+
+2. The func_timeout's error may be printed during running. This does not affect the results.
+
+'''
 import twint
 import pandas as pd
 import datetime as dt
 from datetime import datetime
 from func_timeout import func_timeout, FunctionTimedOut
-
 from utils.data_filter import filter_in, filter_out, filter_entity, process_duplicates, enTweet
 from utils.get_coins import get_coins
 
@@ -60,6 +68,9 @@ def twitter_scrape_by_entity(entity, start_date, end_date):
         df = df[mask2].reset_index(drop=True)
         mask3 = list(df.apply(lambda x: enTweet(x['text']), axis=1))
         df = df[mask3]
+        # use filter_in only if Twitter has a lot of data for the day
+        # mask4 = list(df.apply(lambda x: filter_in(x["text"]), axis=1)) 
+        # df = df[mask4]
         
         # label entity and group duplicates
         df['entity'] = entity
@@ -81,8 +92,6 @@ def twitter_scrape_by_entity(entity, start_date, end_date):
     df = df[['source_id', 'source','article_date','content','url','count','entity','author','coin']]
 
     return df
-
-
 
 def twitter_scrape(entity_list, start_date, end_date):
     df = pd.DataFrame()
