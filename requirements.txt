@@ -124,7 +124,7 @@ tornado==6.1
 tqdm==4.51.0
 traitlets==5.0.5
 transformers==3.4.0
-twint @ git+https://github.com/yunusemrecatalcam/twint.git@bce7bb61ecc4fb3f565197912090442cba9f9213
+twint @ git+https://github.com/twintproject/twint.git@a45a8ac719d5710e7da92f77d9801b351e505c1f
 typing-extensions==3.7.4.3
 tzlocal==2.1
 urllib3==1.25.11
