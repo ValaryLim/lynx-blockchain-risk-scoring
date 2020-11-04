@@ -2,7 +2,7 @@
 note:
 
 1. run this to install a particular versin of twint:
-    pip install --upgrade git+https://github.com/yunusemrecatalcam/twint.git@twitter_legacy2
+    pip install --user --upgrade git+https://github.com/twintproject/twint.git@origin/master#egg=twint 
 
 2. The func_timeout's error may be printed during running. This does not affect the results.
 
