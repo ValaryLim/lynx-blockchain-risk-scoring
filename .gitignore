@@ -36,10 +36,7 @@ automation/data
 scoring/.ipynb_checkpoints
 scoring/utils/__pycache__
 scoring/data
-<<<<<<< HEAD
-=======
 scoring/utils/data
->>>>>>> 4e464f4be3c1f4e19b4ce13723d69c41735341aa
 
 .gitsecret/keys/random_seed
 !*.secret
