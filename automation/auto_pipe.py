@@ -124,7 +124,7 @@ def get_overall_risk(start_date, end_date):
 
 
 
-def train(filepath, train_start_date, train_end_date, eval_start_date = None, eval_end_date = None, deploy = False):
+def train(filepath, train_start_date, train_end_date, eval_start_date = None, eval_end_date = None):
     '''
     Retrain model and update the model used in model_predict
 
@@ -134,7 +134,6 @@ def train(filepath, train_start_date, train_end_date, eval_start_date = None, ev
         train_end_date (datetime): date to end retrieivng data from database for training
         eval_start_date (datetime): date to start retrieivng data from database for evaluation
         eval_end_date (datetime): date to end retrieivng data from database for evaluation
-        deploy (boolean): deploy = True deploys the new model in model_predict
     '''
 
     conn = sqlite3.connect('lynx_data.db')
@@ -153,7 +152,7 @@ def train(filepath, train_start_date, train_end_date, eval_start_date = None, ev
     df = pd.DataFrame(c.fetchall(), columns = list(map(lambda x: x[0], c.description))) 
 
     conn.close()
- 
+
     
     # Retrain model
     model_train(df, output_dir= filepath)
@@ -161,13 +160,20 @@ def train(filepath, train_start_date, train_end_date, eval_start_date = None, ev
     # Evaluate metrics 
     if eval_start_date != None or eval_end_date != None:
         model_eval(eval_start_date, eval_end_date, filepath)
-    
-    # Modify the model being used in model_predict through curr_model.txt
-    if deploy:
-        path = open("../automation/curr_model.txt", "w")
-        path.write(filepath)
-        path.close()
 
+    return 
+
+
+def deploy(filepath):
+    '''
+    Deploy model 
+
+    Input:
+        filepath (str): path to new model to be deployed
+    '''
+    path = open("../automation/curr_model.txt", "w")
+    path.write(filepath)
+    path.close()
 
     return 
 
@@ -176,10 +182,10 @@ def train(filepath, train_start_date, train_end_date, eval_start_date = None, ev
 # entity_list = pd.read_csv(r'./utils/data/entity_list.csv')['entity'].tolist()
 # get_data_all(entity_list, datetime(2020,10,31), datetime(2020,11,2,23,59,59))
 
-filepath = '../automation/models/new_test_model'
-train_start_date = datetime(2020,8,31)
-train_end_date = datetime(2020,8,31,23,59,59)
-eval_start_date = datetime(2020,9,28)
-eval_end_date = datetime(2020,9,28,23,59,59)
+# filepath = '../automation/models/new_test_model'
+# train_start_date = datetime(2020,8,31)
+# train_end_date = datetime(2020,8,31,23,59,59)
+# eval_start_date = datetime(2020,9,28)
+# eval_end_date = datetime(2020,9,28,23,59,59)
 
-train(filepath, train_start_date, train_end_date, eval_start_date = eval_start_date, eval_end_date = eval_end_date, deploy = False)
+# train(filepath, train_start_date, train_end_date, eval_start_date = eval_start_date, eval_end_date = eval_end_date, deploy = False)
