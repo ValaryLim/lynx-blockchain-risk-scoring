@@ -1,18 +1,16 @@
 import pandas as pd
 from datetime import datetime
 from bitcoin import bitcoin_scrape
-from bitcoinist import bitcoinist_scrape #
+from bitcoinist import bitcoinist_scrape
 from bitnewstoday import bitnewstoday_scrape
 from coindesk import coindesk_scrape
 from cointelegraph import cointelegraph_scrape
-from cryptonews import cryptonews_scrape #
-from cryptoslate import cryptoslate_scrape #
+from cryptonews import cryptonews_scrape
+from cryptoslate import cryptoslate_scrape
 from forbes import forbes_scrape
 from insidebitcoins import insidebitcoins_scrape
 from nulltx import nulltx_scrape
 
-# import sys
-# sys.path.insert(1, './utils')
 from utils.data_filter import filter_out, filter_entity, process_duplicates
 from utils.get_coins import get_coins
 
@@ -22,21 +20,32 @@ from utils.get_coins import get_coins
 # # from blockonomi import blockonomi_scrape
 
 
-""" Scrapes all crypto sites when an entity is queried. """
-
 def crypto_scrape_by_entity(entity, start_date, end_date):
+    '''
+    Retrieves articles relating to entity from crypto news sites within the stipulated time frame 
+
+    Input:
+        entity(string): entity name to retrieve data on
+        start_date(datetime): date to begin scraping from
+        end_date(datetime): date to stop scraping
+    Output:
+        df(dataframe): dataframe with columns = [entity	title, excerpt, category, coin, source, article_date,	
+                                url, img_link, content, count, date_time_all, author, author_url, source_id]
+    '''
+
+    entity = entity.lower()
+
     # create output dataframe
-    column_names = ['domain', 'date_time', 'title', 'excerpt', \
+    column_names = ['domain', 'date_time', 'title', 'excerpt', 'entity' \
                     'article_url', 'image_url', 'author', 'author_url', \
                     'category','coin', 'source_id']
 
     df = pd.DataFrame(columns = column_names)
 
-    # to add bitcoinist, cryptonews, cryptoslate
-    functions_lst = [bitcoin_scrape, bitnewstoday_scrape, \
-                     insidebitcoins_scrape, nulltx_scrape, \
-                     cointelegraph_scrape, coindesk_scrape, \
-                     forbes_scrape]
+    functions_lst = [bitcoin_scrape, bitcoinist_scrape, bitnewstoday_scrape, \
+                     coindesk_scrape, cointelegraph_scrape, cryptonews_scrape,\
+                     cryptoslate_scrape, coindesk_scrape, forbes_scrape,\
+                     insidebitcoins_scrape, nulltx_scrape]
 
     for f in functions_lst:
         # call functions to scrape data from individual websites
@@ -68,13 +77,13 @@ def crypto_scrape_by_entity(entity, start_date, end_date):
     # rename dataframe using naming convention in final database
     df = df.rename({'text':'content', 'article_url':'url', 'domain':'source', \
                     'date_time':'article_date', 'image_url':'img_link'}, axis = 1)
+    
+    # keep only relevant columns
+    df = df[['source','source_id','article_date','content', 'url','count','img_link', 'entity','author','coin']]
 
-    # print(df.dtypes)
-         
     return df
 
 
-""" Scrapes all crypto sites when an entity list is queried. """
 
 def crypto_scrape(entity_list, start_date, end_date):
     # create output dataframe
@@ -84,14 +93,10 @@ def crypto_scrape(entity_list, start_date, end_date):
 
     df = pd.DataFrame(columns = column_names)
 
-    # i = 0
     # loop through list of entities and scrape all sites for each entity
     for entity in entity_list:
-        # print(i, entity)
         entity_df = crypto_scrape_by_entity(entity, start_date, end_date)
-        entity_df['entity'] = entity
         df = df.append(entity_df)
-        # i += 1
 
     # drop columns where all rows are nan
     df = df.dropna(axis=1, how='all')
@@ -123,3 +128,5 @@ def crypto_scrape(entity_list, start_date, end_date):
 # end_date = datetime(2020, 10, 25, 23, 59, 59)
 # df = crypto_scrape_by_entity('huobi', start_date, end_date)
 #################################################
+
+crypto_scrape_by_entity('0xuniverse', datetime(2020,10,31), datetime(2020,11,2,23,59,59))

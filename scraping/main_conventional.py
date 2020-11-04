@@ -5,14 +5,27 @@ from theguardian import theguardian_scrape
 from google1 import google_scrape
 from cryptocontrol import cryptocontrol_scrape
 
-# import sys
-# sys.path.insert(1, './utils/')
 from utils.data_filter import filter_out, filter_entity, process_duplicates
 from utils.get_coins import get_coins
 
 def conventional_scrape_by_entity(entity, start_date, end_date):
+    '''
+    Retrieves articles relating to entity from conventional news sources within stipulated time frame 
+
+    Input:
+        entity(string): entity name to retrieve data on
+        start_date(datetime): date to begin scraping from
+        end_date(datetime): date to stop scraping
+    Output:
+        df(dataframe): dataframe with columns = [article_date, title, excerpt, source, url, source_id, content,
+                                            	entity, count, coin, date_time_all]
+    
+    '''
+    entity = entity.lower()
+
     column_names = ["date_time", "title", "excerpt", "domain", "article_url",\
-         "image_url", "hotness", "activity_hotness"]
+        "image_url", "hotness", "activity_hotness"]
+
     combined_df = pd.DataFrame(columns = column_names)
 
     # retrieve data
@@ -59,12 +72,30 @@ def conventional_scrape_by_entity(entity, start_date, end_date):
     # reset index
     combined_df = combined_df.reset_index(drop=True)
 
+    # rename dataframe using naming convention in final database
     combined_df = combined_df.rename({'text':'content', 'article_url':'url', 'domain':'source', \
                                     'date_time':'article_date'}, axis = 1)
 
+    # keep only relevant columns
+    combined_df = combined_df[['source','source_id','article_date','content', 'url','count','entity','coin']]
+
     return combined_df
 
+
 def conventional_scrape(entity_list, start_date, end_date):
+    '''
+    Retrieves articles relating to entitities in entity list from conventional news sources within
+    the stipulated time frame 
+
+    Input:
+        entity_list(list): list of entity names to retrieve data on
+        start_date(datetime): date to begin scraping from
+        end_date(datetime): date to stop scraping
+    Output:
+        df(dataframe): dataframe with columns = [article_date, title, excerpt, source, url, source_id, content,
+                                            	entity, count, coin, date_time_all]
+    '''
+
     result_df = pd.DataFrame()
     for i in range(len(entity_list)):
         temp_df = conventional_scrape_by_entity(entity=entity_list[i], start_date=start_date, end_date=end_date)
@@ -80,6 +111,8 @@ def conventional_scrape(entity_list, start_date, end_date):
     result_df = result_df.reset_index(drop = True)
 
     return result_df
+
+
 
 def retrieve_cases(file, time_frame=7):
     hacks_list = pd.read_csv(file, header=0)
