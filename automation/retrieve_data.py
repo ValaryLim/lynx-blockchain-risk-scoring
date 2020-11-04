@@ -44,7 +44,7 @@ def retrieve_data(entity, start_date, end_date):
 
     print('reddit')
     #Reddit scraping
-    reddit_df = reddit_scrape_by_entity(entity, start_date, end_date)
+    # reddit_df = reddit_scrape_by_entity(entity, start_date, end_date)
 
     print('scraping done...')
 
@@ -56,7 +56,7 @@ def retrieve_data(entity, start_date, end_date):
     df = df.append(conv_df, ignore_index = True)
     df = df.append(crypto_df, ignore_index = True)
     df = df.append(twitter_df, ignore_index = True)
-    df = df.append(reddit_df, ignore_index = True)
+    # df = df.append(reddit_df, ignore_index = True)
     
     #Fill NA with ''
     df = df.fillna('')
