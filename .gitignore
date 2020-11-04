@@ -31,6 +31,7 @@ automation/__pycache__
 automation/utils/data
 automation/utils/__pycache__
 automation/lynx_data.db
+automation/data
 
 scoring/.ipynb_checkpoints
 scoring/utils/__pycache__
