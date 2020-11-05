@@ -26,16 +26,23 @@ pip install -r requirements.txt
 
 ## Usage
 
-The entire data retrieval, risk scoring, and data storage pipeline of the project have been automated in the **auto_pipe.py** file. The user simply specifies the list of entities and the time period for the get_data_all function to complete the entire process. For example,
+The entire data retrieval, risk scoring, and data storage pipeline of the project have been automated in the **auto_pipe.py** file. The user simply specifies the entity and the time period for the get_data function.  For example,
 
 ```python
 from datetime import datetime
 
-entities = ['binance','bitfinex', 'huobi', 'okex', 'upbit']
+entity = 'binance'
 start = datetime(2020,9,1)
 end = datetime(2020,10,26)
-get_data_all(entities, start, end)
+get_data(entity, start, end)
 ```
+
+<br/>After retrieval of data for all entities, user need to apply the get_overall_risk function to get the overall risk score for the entities. <br/>
+
+```python
+get_overall_risk(start, end)
+```
+
 <br/>The **auto_pipe.py** file also provides a **train** function for the model to be re-trained when performance drops (or on a monthly basis depending on whichever is more suitable).  The **train** method automatically retrieves data from the database for re-training. Parameters that the **train** functions accepts are specified under the function itself. <br/>
 
 
