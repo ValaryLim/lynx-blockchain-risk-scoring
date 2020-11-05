@@ -37,7 +37,7 @@ end = datetime(2020,10,26)
 get_data(entity, start, end)
 ```
 
-<br/>After retrieval of data for all entities, users need to apply the get_overall_risk function to calculate and store the overall risk score for all entities on each date.
+<br/>After retrieval of data for all entities, users need to apply the **get_overall_risk** function to calculate and store the overall risk score for all entities on each date within the date range.
 
 The **auto_pipe.py** file also provides a **train** function for the model to be re-trained when performance drops (or on a monthly basis depending on whichever is more suitable).  The **train** method automatically retrieves data from the database for re-training. Parameters that the **train** functions accepts are specified under the function itself. <br/>
 
