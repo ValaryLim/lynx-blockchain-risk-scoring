@@ -12,6 +12,11 @@ A more detailed breakdown of the project can be seen in the flowchart below.<br/
 
 ## Getting Started
 
+This project should be run on Python 3.7. A conda environment can be created using the following:
+```bash
+conda create -n myenv python=3.7
+```
+
 The end-user mainly makes use of the automation branch of the GitHub repository. A **requirements.txt** file is provided for the specification of the packages used in the project. The user can run the following command to install the packages.
 
 ```bash
@@ -21,17 +26,20 @@ pip install -r requirements.txt
 
 ## Usage
 
-The entire data retrieval, risk scoring, and data storage pipeline of the project have been automated in the **auto_pipe.py** file. The user simply specifies the list of entities and the time period for the get_data_all function to complete the entire process. For example,
+The entire data retrieval, risk scoring, and data storage pipeline of the project have been automated in the **auto_pipe.py** file. The user simply specifies the entity and the time period for the get_data function.  For example,
 
 ```python
 from datetime import datetime
 
-entities = ['binance','bitfinex', 'huobi', 'okex', 'upbit']
+entity = 'binance'
 start = datetime(2020,9,1)
 end = datetime(2020,10,26)
-get_data_all(entities, start, end)
+get_data(entity, start, end)
 ```
-<br/>The **auto_pipe.py** file also provides a **train** function for the model to be re-trained when performance drops (or on a monthly basis depending on whichever is more suitable).  The **train** method automatically retrieves data from the database for re-training. Parameters that the **train** functions accepts are specified under the function itself. <br/>
+
+<br/>After retrieval of data for all entities, users need to apply the **get_overall_risk** function to calculate and store the overall risk score for all entities on each date within the date range.
+
+The **auto_pipe.py** file also provides a **train** function for the model to be re-trained when performance drops (or on a monthly basis depending on whichever is more suitable).  The **train** method automatically retrieves data from the database for re-training. Parameters that the **train** functions accepts are specified under the function itself. <br/>
 
 
 

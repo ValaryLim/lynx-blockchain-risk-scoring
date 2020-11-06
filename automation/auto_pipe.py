@@ -14,7 +14,7 @@ from scoring_automated import entity_risk_score
 sys.path.remove('../scoring/utils')
 
 # for dashboard
-from update_csv import update_csv
+# from update_csv import update_csv
 
 
 def get_data_all(entity_list, start_date, end_date):
@@ -57,9 +57,7 @@ def get_data(entity, start_date, end_date):
     
     #Append data into table
     df.to_sql('POST_DATA', conn, if_exists='append', index = False)
-    update_csv(df, '../automation/data/all_predicted_2020.csv')
-
-    print('joined to df')
+    # update_csv(df, '../automation/data/all_predicted_2020.csv')
 
     #Get dataframe of risk scores by date and entity
     entity_df_tem = entity_risk_score(df, entity, start_date, end_date)
@@ -67,7 +65,7 @@ def get_data(entity, start_date, end_date):
 
     #Store data into table in database
     entity_df.to_sql('ENTITY_DATA', conn, if_exists='append', index = False)
-    update_csv(entity_df_tem, '../automation/data/entity_risk_score_2020.csv')
+    # update_csv(entity_df_tem, '../automation/data/entity_risk_score_2020.csv')
 
     #Close connection
     conn.close()
@@ -76,14 +74,12 @@ def get_data(entity, start_date, end_date):
 
 
 ############# Testing #############
-#get_data('binance', datetime(2020,9,1), datetime(2020,10,26))
+# get_data('binance', datetime(2020,9,1), datetime(2020,10,26))
 
 # entity_list = pd.read_csv('../automation/utils/data/entity_list')['entity'].tolist()
 # for entity in entity_list:
 #     retrieve_data(entity, start_date, end_date)
 ###################################
-
-
 
 
 def get_overall_risk(start_date, end_date):
@@ -115,7 +111,7 @@ def get_overall_risk(start_date, end_date):
 
     #Store data into table in database
     entity_df.to_sql('ENTITY_DATA', conn, if_exists='append', index = False)
-    update_csv(entity_df_tem, '../automation/data/entity_risk_score_2020.csv')
+    #update_csv(entity_df_tem, '../automation/data/entity_risk_score_2020.csv')
 
     #Close connection
     conn.close()
@@ -183,11 +179,11 @@ def deploy(filepath):
 # get_data_all(entity_list, datetime(2020,10,31), datetime(2020,11,2,23,59,59))
 
 # filepath = '../automation/models/new_test_model'
-# train_start_date = datetime(2020,8,31)
-# train_end_date = datetime(2020,8,31,23,59,59)
-# eval_start_date = datetime(2020,9,28)
-# eval_end_date = datetime(2020,9,28,23,59,59)
+# train_start_date = datetime(2020,10,1)
+# train_end_date = datetime(2020,10,25,23,59,59)
+# eval_start_date = datetime(2020,10,26)
+# eval_end_date = datetime(2020,10,30,23,59,59)
 
 # train(filepath, train_start_date, train_end_date, eval_start_date = eval_start_date, eval_end_date = eval_end_date)
-# if results satisfactory for deployment
+# # if results satisfactory for deployment
 # deploy(filepath)
