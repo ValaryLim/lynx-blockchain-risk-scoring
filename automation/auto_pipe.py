@@ -14,7 +14,7 @@ from scoring_automated import entity_risk_score
 sys.path.remove('../scoring/utils')
 
 # for dashboard
-from update_csv import update_csv
+# from update_csv import update_csv
 
 
 def get_data_all(entity_list, start_date, end_date):
@@ -57,9 +57,7 @@ def get_data(entity, start_date, end_date):
     
     #Append data into table
     df.to_sql('POST_DATA', conn, if_exists='append', index = False)
-    update_csv(df, '../automation/data/all_predicted_2020.csv')
-
-    print('joined to df')
+    # update_csv(df, '../automation/data/all_predicted_2020.csv')
 
     #Get dataframe of risk scores by date and entity
     entity_df_tem = entity_risk_score(df, entity, start_date, end_date)
@@ -67,7 +65,7 @@ def get_data(entity, start_date, end_date):
 
     #Store data into table in database
     entity_df.to_sql('ENTITY_DATA', conn, if_exists='append', index = False)
-    update_csv(entity_df_tem, '../automation/data/entity_risk_score_2020.csv')
+    # update_csv(entity_df_tem, '../automation/data/entity_risk_score_2020.csv')
 
     #Close connection
     conn.close()
@@ -113,7 +111,7 @@ def get_overall_risk(start_date, end_date):
 
     #Store data into table in database
     entity_df.to_sql('ENTITY_DATA', conn, if_exists='append', index = False)
-    update_csv(entity_df_tem, '../automation/data/entity_risk_score_2020.csv')
+    #update_csv(entity_df_tem, '../automation/data/entity_risk_score_2020.csv')
 
     #Close connection
     conn.close()
