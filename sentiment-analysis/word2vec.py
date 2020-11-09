@@ -99,7 +99,7 @@ def get_results(model, test_features, test_label):
 '''
 using news as an example, just change the data input accordingly for reddit, twitter and all
 '''
-# news = pd.read_csv('../data/final_0923/news_test.csv', index_col = 0)
+# news = pd.read_csv('../data/news_test.csv', index_col = 0)
 # news_features = get_embed_features(news['text'])
 # get_results(lr, news_features, news['label'])    #logistic regression
 # get_results(svm, news_features, news['label'])   #svm 
