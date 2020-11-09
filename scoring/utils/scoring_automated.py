@@ -28,12 +28,14 @@ def entity_risk_score(df, entity, start_date, end_date,
     risk_score : pd.DataFrame
         Database 2, i.e. combined risk score for each day over time
     '''
+    entity = entity.lower()
+
     # set counter (required for future processing)
     if "count" in df.columns:
         df["counter"] = df["count"]
 
     # determine entity threshold
-    thresholds_df = pd.read_csv('data/entity_thresholds.csv')
+    thresholds_df = pd.read_csv('../scoring/utils/data/entity_thresholds.csv')
     thresholds_df = thresholds_df[thresholds_df["entity"] == entity] # filter for entity
     thresholds_df = thresholds_df.reset_index()
     thresholds = dict(thresholds_df) # convert to dict
@@ -70,7 +72,8 @@ def entity_risk_score(df, entity, start_date, end_date,
     # add entity column
     overall_score["entity"] = entity
     
-    return overall_score[["date", "entity", "score"]]
+    return overall_score
+
 
 def weighted_average_risk(df, start_date, end_date, source="news", threshold=0):
     '''
@@ -111,6 +114,10 @@ def weighted_average_risk(df, start_date, end_date, source="news", threshold=0):
         df_copy = df_copy[df_copy["source"]!="reddit"]
     elif source == "twitter" or source == "reddit": # source is twitter or reddit
         df_copy = df_copy[df_copy["source"]==source]
+    
+    # get dates of articles
+    df_copy['article_date'] = pd.to_datetime(df_copy['article_date'], format='%Y-%m-%d %H:%M:%S')
+    df_copy["date"] = df_copy["article_date"].dt.date
     
     # get sum of risk score by date
     risk_score = df_copy.groupby(by=["date"]).risk_count.sum()
