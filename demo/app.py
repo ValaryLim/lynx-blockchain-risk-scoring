@@ -8,7 +8,8 @@ from dash.dependencies import Input, Output, State
 import plotly.express as px
 
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
+import base64
 
 # set application
 app = dash.Dash(__name__, suppress_callback_exceptions=True, \
@@ -38,13 +39,17 @@ CONTENT_STYLE = {
 
 # styles for the score displays
 SCORE_STYLE = {
-    "font-size": "15px", 
+    "font-size": "16px", 
     "font-weight": "600", 
     "background-color": "#f1f4f9", 
     "border-color": "white",
-    "height": "80px", 
-    # "border-radius": "10px", 
-    "text-align": "center"
+    "display": "inline-block",
+    "width": "30px",
+    # "height": "65px", 
+    "border-radius": "100px", 
+    "padding": "10px",
+    "text-align": "center",
+    "vertical-align": "center",
 }
 
 # styles for the side tabs
@@ -57,7 +62,7 @@ TAB_STYLE = {
 unclicked_button_style = {'background-color': '#f1f4f9',
                             'border': '#f1f4f9',
                             'color': 'black',
-                            'height': '50px',
+                            'height': '70px',
                             'width': '100%',
                             'margin-top': '0px',
                             'margin-left': '0px'}
@@ -65,16 +70,21 @@ unclicked_button_style = {'background-color': '#f1f4f9',
 clicked_button_style = {'background-color': 'white',
                         'border': '#f1f4f9',
                         'color': 'darkblue',
-                        'height': '50px',
+                        'height': '70px',
                         'width': '100%',
                         'margin-top': '0px',
                         'margin-left': '0px'}
 
 
 #### SIDEBAR ##################################################################
+# image
+image_filename = 'assets/lynx_logo.png'
+encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+
 sidebar = html.Div(
     [
-        html.P("CyLynx Demo", className="display-4"),
+        html.Img(src='https://s2-cdn.greenhouse.io/external_greenhouse_job_boards/logos/400/688/200/original/Lynx_LinkedIn.png?1573727274', style={'width': '300px', 'height': '50px', 'object-fit': 'cover'}),
+        html.H5("CyLynx Demo", className="display-4", style={'font-weight': '500'}),
         html.H6("Demonstration Dashboard for BT4103", className="lead"),
         html.Hr(),
         html.Br(),
@@ -116,6 +126,11 @@ entity_input = html.Div([
     html.Div(id='dd-output-container')
 ], style={'width': '30%', 'display': 'inline-block', 'margin-right': 30})
 
+# read sample_risk_data
+sample_risk_data = pd.read_csv("data/entity_risk_score_2020.csv")
+max_date = max(sample_risk_data['date'])
+max_date = datetime.strptime(max_date, '%Y-%m-%d') + timedelta(days=1)
+
 # date input
 date_input = html.Div([
     dbc.Label("Date Range", className="p", style={"font-weight": "600", "font-size": "14px"}),
@@ -123,8 +138,8 @@ date_input = html.Div([
     dcc.DatePickerRange(
         id="date-input",
         style={"font-size": "14px"},
-        min_date_allowed = '2020-01-01',
-        max_date_allowed = datetime.today(),
+        min_date_allowed = min(sample_risk_data['date']),
+        max_date_allowed =  max_date,
         initial_visible_month = datetime.today(),
         className="mb-3"
     )
@@ -183,23 +198,30 @@ def generate_table(name, dataframe):
                     {"name": i, "id": i, "selectable":True} for i in dataframe.columns
                 ],
                 data=dataframe.to_dict('records'),
-                style_data={'whiteSpace': 'normal', 'height': 'auto'},
+                style_data={'whiteSpace': 'normal'},
+                style_header={'fontWeight': 'bold'},
                 style_cell={
-                    'height': 'auto',
                     # all three widths are needed
-                    'minWidth': '80px', 'width': '150px', 'maxWidth': '180px',
+                    'minWidth': '5px', 'width': '80px', 'maxWidth': '180px',
+                    'minHeight': '10px', 'height': '10px', 'maxHeight': '10px',
                     'whiteSpace': 'normal',
-                    'textAlign': 'left',
-                    'fontSize': 12, 
-                    'font-family':'Verdana',
+                    'fontSize': 12,
+                    'font-family': 'Verdana',
+                    'overflow': 'hidden',
                 },
+                style_cell_conditional = [{'if': {'column_id': ['Date', 'Risk Score']}, 'textAlign': 'center'},
+                                          {'if': {'column_id': ['Content', 'URL']}, 'textAlign': 'left'}],
                 sort_action='native',
                 sort_mode='single',
                 sort_by=[],
                 page_size=5,
                 css=[{'selector': '.row', 'rule': 'margin: 0'}],
+                
+            style_as_list_view=True,
             ), 
-            style={})
+            style={}),
+        html.Br(),
+        html.Br()
 ])
 
 def generate_graph(entity, start_date, end_date):
@@ -227,13 +249,16 @@ def generate_graph(entity, start_date, end_date):
         graph_data = graph_data.append(source_data, ignore_index=True)
 
     # plot graph
-    fig = px.line(graph_data, x='date', y='score', color='source')
+    fig = px.line(graph_data, x='date', y='score', color='source', \
+                  line_dash_sequence=['dot', 'dot', 'dot', 'solid'],
+                  line_dash='source', \
+                  color_discrete_sequence=['#0CC078', '#FB6962', '#6EB5FF', 'black'])
 
     fig.update_layout(
         # title="Risk Score Over Time",
         title_x=0.5,
         xaxis_title="Date",
-        yaxis_title="Risk Score (in %)",
+        yaxis_title="Risk Score",
         legend_title="Source",
     )
 
@@ -283,40 +308,46 @@ def render_entity_page(n_clicks, entity, start_date, end_date):
         if score >= 75:
             return 'red'
         elif score >= 50:
-            return 'orange'
+            return '#FF8C00' # orange
         else:
             return 'black'
 
     score_display = html.Div([
         dbc.Label("Open Source Information", className="p", style={"font-size": "30px", "font-weight": "600", 'display': 'inline-block', 'margin-right': 50}),
         dbc.Label((f"Overall Score: {str(max_score.loc['score', 'max_score'])}"), 
-                    className="p", style={"font-size": "15px", "font-weight": "600", 'width': '20%', 'display': 'inline-block', "background-color": "#D77560", "height": "30px", "border-radius": "25px", "text-align": "center"}),
+                    className="p", style={"color": get_color(max_score.loc['score', 'max_score']), "font-size": "20px", "font-weight": "600", 'width': '300px', 'display': 'inline-block', "background-color": "#f1f4f9", "height": "40px", "padding": "5px", "text-align": "center", "vertical-align": "center"}),
         html.Br(),
         html.Br(),
         dbc.Row(
             [
                 dbc.Col([
                     html.Div("News"),
-                    html.Br(),
                     html.Div(str(max_score.loc['news_score', 'max_score']), 
-                    style={'font-size': '18px', 'color': get_color(max_score.loc['news_score', 'max_score'])})],
+                    style={'color': get_color(max_score.loc['news_score', 'max_score'])})],
                     style=SCORE_STYLE),
 
                 dbc.Col([
                     html.Div("Reddit"),
-                    html.Br(),
                     html.Div(str(max_score.loc['reddit_score', 'max_score']), 
-                    style={'font-size': '18px', 'color': get_color(max_score.loc['reddit_score', 'max_score'])})],
+                    style={'color': get_color(max_score.loc['reddit_score', 'max_score'])})],
                     style=SCORE_STYLE),
 
                 dbc.Col([
                     html.Div("Twitter"),
-                    html.Br(),
                     html.Div(str(max_score.loc['twitter_score', 'max_score']), 
-                    style={'font-size': '18px', 'color': get_color(max_score.loc['twitter_score', 'max_score'])})],
+                    style={'color': get_color(max_score.loc['twitter_score', 'max_score'])})],
                     style=SCORE_STYLE),
             ]
-        ),   
+        ),  
+        html.Br(),
+
+        dbc.Row([
+            html.Div("Legend:  ", style={"font-size": '16px', "font-weight": 400, 'display': 'inline-block', "padding": "10px"}), 
+            html.Div("High Risk  ", style={"font-size": '16px', "font-weight": 400, 'color':'red', 'display': 'inline-block', "padding": "10px"}),
+            html.Div("Medium Risk  ", style={"font-size": '16px', "font-weight": 400, 'color': '#FF8C00', 'display': 'inline-block', "padding": "10px"}),
+            html.Div("Low/ No Risk ", style={"font-size": '16px', "font-weight": 400, 'display': 'inline-block', "padding": "10px"})]),
+
+        html.Br(), 
     ]
     )
 
@@ -371,8 +402,8 @@ overall_content = html.Div(
         # html.Div(id = "overall-score-display"),
         # html.Br(),
         html.Br(),
-        html.Div(id = "overall-graph"),    
-        html.Div(id = "overall-table")    
+        html.Div(id='overall-graph'),
+        html.Div(id='overall-table')
     ], 
     id="overall-page-content", style=CONTENT_STYLE,
 )
@@ -394,12 +425,13 @@ def generate_overall_table(name, dataframe):
                 data=dataframe.to_dict('records'),
                 page_action='none',
                 fixed_rows={'headers': True},
-                style_table={'height': '300px', 'overflowY': 'auto'},
+                style_table={'height': '300px', 'overflowY': 'auto', 'width': '600px'},
+                style_header={'fontWeight': 'bold'},
                 style_data={'whiteSpace': 'normal', 'height': 'auto'},
                 style_cell={
                     'height': 'auto',
                     # all three widths are needed
-                    # 'minWidth': '80px', 'width': '150px', 'maxWidth': '180px',
+                    # 'minWidth': '30px', 'width': '50px', 'maxWidth': '80px',
                     'whiteSpace': 'normal',
                     'textAlign': 'left',
                     'fontSize': 12, 
@@ -411,8 +443,7 @@ def generate_overall_table(name, dataframe):
 ])
 
 @app.callback(
-    [# Output("overall-score-display", "children"),
-    Output("overall-graph", "children"),
+    [Output("overall-graph", "children"),
     Output("overall-table", "children")],
     [Input("submit", "n_clicks")],
     [State("date-input", "start_date"),
@@ -430,30 +461,6 @@ def render_overall_page(n_clicks, start_date, end_date):
     sample_risk_data = pd.read_csv("data/entity_risk_score_2020.csv")
     # extract relevant date and entity
     sample_risk_data = sample_risk_data[(sample_risk_data.date >= start_date) & (sample_risk_data.date <= end_date)]
-    
-    '''
-    sample_risk_data_slice = sample_risk_data.loc[sample_risk_data['entity']=='overall']
-    # max score over time
-    max_score = pd.DataFrame(sample_risk_data_slice.max(axis=0)).iloc[2:6]
-    max_score.columns = ['max_score']
-    max_score['max_score'] = [round(float(x), 2) for x in max_score['max_score']]
-
-    overall_score_display = html.Div([
-        dbc.Label("Open Source Information", className="p", style={"font-size": "30px", "font-weight": "600", 'display': 'inline-block', 'margin-right': 50}),
-        dbc.Label((f"Overall Score: {str(max_score.loc['score', 'max_score'])}"), 
-                    className="p", style={"font-size": "15px", "font-weight": "600", 'width': '20%', 'display': 'inline-block', "background-color": "#D77560", "height": "30px", "border-radius": "25px", "text-align": "center"}),
-        html.Br(),
-        html.Br(),
-        dbc.Row(
-            [
-                dbc.Col(html.Div(f"News: {str(max_score.loc['news_score', 'max_score'])}"), style=SCORE_STYLE),
-                dbc.Col(html.Div(f"Reddit: {str(max_score.loc['reddit_score', 'max_score'])}", style=SCORE_STYLE)),
-                dbc.Col(html.Div(f"Twitter: {str(max_score.loc['twitter_score', 'max_score'])}", style=SCORE_STYLE)),
-            ]
-        ),   
-    ]
-    )
-    '''
 
     ##### GRAPH #####
     overall_graph = html.Div(generate_graph('overall', str(start_date),str(end_date)))
@@ -471,7 +478,6 @@ def render_overall_page(n_clicks, start_date, end_date):
 
     overall_table = generate_overall_table("High Risk Entities by Overall Score", overall_data)
 
-    # return (overall_score_display, overall_graph, overall_table)
     return (overall_graph, overall_table)
 
 
