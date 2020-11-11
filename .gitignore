@@ -38,5 +38,7 @@ scoring/utils/__pycache__
 scoring/data
 scoring/utils/data
 
+demo/data
+
 .gitsecret/keys/random_seed
 !*.secret
