@@ -6,7 +6,7 @@
 
 A more detailed breakdown of the project can be seen in the flowchart below.<br/>
 
-  <br/>![image](https://i.postimg.cc/1X6LxnND/Screenshot-2020-11-01-at-1-34-31-PM.png)<br/>
+  <br/>![image](https://i.postimg.cc/8ct5yj5w/Screenshot-2020-11-07-at-12-03-08-AM.png)<br/>
 
 
 
