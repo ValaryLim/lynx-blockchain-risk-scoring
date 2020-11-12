@@ -2,6 +2,7 @@ from datetime import datetime
 import pandas as pd
 import numpy as np
 import sqlite3
+import logging
 
 from retrieve_data import retrieve_data
 from model_train import model_train
@@ -53,19 +54,30 @@ def get_data(entity, start_date, end_date):
     c = conn.cursor()
 
     # Scrape data and predict
-    df = retrieve_data(entity, start_date, end_date)
+    try:
+        df = retrieve_data(entity, start_date, end_date)
+        
+        #Append data into table
+        df.to_sql('POST_DATA', conn, if_exists='append', index = False)
+        # update_csv(df, '../automation/data/all_predicted_2020.csv')
+
+        #Get dataframe of risk scores by date and entity
+        entity_df_tem = entity_risk_score(df, entity, start_date, end_date)
+        entity_df = entity_df_tem[["date", "entity", "score"]]
+
+        #Store data into table in database
+        entity_df.to_sql('ENTITY_DATA', conn, if_exists='append', index = False)
+        # update_csv(entity_df_tem, '../automation/data/entity_risk_score_2020.csv')
     
-    #Append data into table
-    df.to_sql('POST_DATA', conn, if_exists='append', index = False)
-    # update_csv(df, '../automation/data/all_predicted_2020.csv')
+    # catch exceptions and log to error_log.log file
+    except Exception as e:
 
-    #Get dataframe of risk scores by date and entity
-    entity_df_tem = entity_risk_score(df, entity, start_date, end_date)
-    entity_df = entity_df_tem[["date", "entity", "score"]]
+        logging.basicConfig(filename='../automation/error_log.log', level=logging.DEBUG, 
+                    format='%(asctime)s %(levelname)s %(name)s %(message)s')
 
-    #Store data into table in database
-    entity_df.to_sql('ENTITY_DATA', conn, if_exists='append', index = False)
-    # update_csv(entity_df_tem, '../automation/data/entity_risk_score_2020.csv')
+        logger = logging.getLogger(__name__)
+
+        logger.exception(e)
 
     #Close connection
     conn.close()
@@ -74,7 +86,7 @@ def get_data(entity, start_date, end_date):
 
 
 ############# Testing #############
-# get_data('binance', datetime(2020,9,1), datetime(2020,10,26))
+# get_data('okex', datetime(2020,1,1), datetime(2020,11,11))
 
 # entity_list = pd.read_csv('../automation/utils/data/entity_list')['entity'].tolist()
 # for entity in entity_list:
@@ -117,7 +129,6 @@ def get_overall_risk(start_date, end_date):
     conn.close()
 
     return 
-
 
 
 def train(filepath, train_start_date, train_end_date, eval_start_date = None, eval_end_date = None):
@@ -174,10 +185,24 @@ def deploy(filepath):
     return 
 
 
-#################### Testing ####################
-# entity_list = pd.read_csv(r'./utils/data/entity_list.csv')['entity'].tolist()
-# get_data_all(entity_list, datetime(2020,10,31), datetime(2020,11,2,23,59,59))
+def clear_log():
+    '''
+    Clears log file that may have come from previous runs
+    '''
+    with open('../automation/error_log.log', 'w'):
+        pass
 
+
+####################### How to run ########################
+
+################ retrieving data ################
+# entity_list = pd.read_csv(r'./utils/data/entity_list.csv')['entity'].tolist()
+# clear_log()
+# for entity in entity_list:
+#   print(entity)
+#   get_data(entity, datetime(2020,11,12), datetime(2020,11,13))
+
+################ training & deployment ################
 # filepath = '../automation/models/new_test_model'
 # train_start_date = datetime(2020,10,1)
 # train_end_date = datetime(2020,10,25,23,59,59)
@@ -187,3 +212,4 @@ def deploy(filepath):
 # train(filepath, train_start_date, train_end_date, eval_start_date = eval_start_date, eval_end_date = eval_end_date)
 # # if results satisfactory for deployment
 # deploy(filepath)
+

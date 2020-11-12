@@ -128,5 +128,3 @@ def crypto_scrape(entity_list, start_date, end_date):
 # end_date = datetime(2020, 10, 25, 23, 59, 59)
 # df = crypto_scrape_by_entity('huobi', start_date, end_date)
 #################################################
-
-crypto_scrape_by_entity('0xuniverse', datetime(2020,10,31), datetime(2020,11,2,23,59,59))
