@@ -14,6 +14,7 @@ import base64
 # set application
 app = dash.Dash(__name__, suppress_callback_exceptions=True, \
                 external_stylesheets=["assets/datepicker.css", dbc.themes.BOOTSTRAP])
+server = app.server
 
 
 #### STYLES ###################################################################
