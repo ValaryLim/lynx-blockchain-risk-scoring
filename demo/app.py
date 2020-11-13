@@ -129,7 +129,8 @@ entity_input = html.Div([
 
 # read sample_risk_data
 sample_risk_data = pd.read_csv('https://raw.githubusercontent.com/ValaryLim/lynx-blockchain-risk-scoring/yanjean/dashboard/demo/data/entity_risk_score_data.csv', sep=',')
-max_date = max(sample_risk_data['date'])
+sample_risk_data['date_format'] = sample_risk_data.apply(lambda x: x.date[0:10], axis=1)
+max_date = max(sample_risk_data['date_format'])
 max_date = datetime.strptime(max_date, '%Y-%m-%d') + timedelta(days=1)
 
 # date input
@@ -177,7 +178,8 @@ entity_content = html.Div(
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     sidebar,
-    dbc.Spinner(id='page-content', spinner_style={"width": "3rem", "height": "3rem"})
+    html.Div(id='page-content')
+    # dbc.Spinner(id='page-content', spinner_style={"width": "3rem", "height": "3rem"})
 ])
 
 
@@ -210,8 +212,11 @@ def generate_table(name, dataframe):
                     'font-family': 'Verdana',
                     'overflow': 'hidden',
                 },
-                style_cell_conditional = [{'if': {'column_id': ['Date', 'Risk Score']}, 'textAlign': 'center'},
-                                          {'if': {'column_id': ['Content', 'URL']}, 'textAlign': 'left'}],
+                style_cell_conditional = [
+                                          {'if': {'column_id': 'Date'}, 'textAlign': 'center'},
+                                          {'if': {'column_id': 'Risk Score'}, 'textAlign': 'center'},
+                                          {'if': {'column_id': 'Content'}, 'textAlign': 'left'},
+                                          {'if': {'column_id': 'URL'}, 'textAlign': 'left'}],
                 sort_action='native',
                 sort_mode='single',
                 sort_by=[],
