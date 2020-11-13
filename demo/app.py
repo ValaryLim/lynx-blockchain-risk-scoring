@@ -376,9 +376,9 @@ def render_entity_page(n_clicks, entity, start_date, end_date):
     # format data
     df['date'] = df['article_date'].dt.date
     df = df.round({'predicted_risk': 2})
-    crypto_df = df[(df.source!="Twitter") & (df.source!="reddit")]
+    crypto_df = df[(df.source!="twitter") & (df.source!="reddit")]
     reddit_df = df[df.source=="reddit"]
-    twitter_df = df[df.source=="Twitter"]
+    twitter_df = df[df.source=="twitter"]
 
     # rename columns
     columns = {"date": "Date", "content": "Content", \
