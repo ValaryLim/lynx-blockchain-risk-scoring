@@ -108,7 +108,7 @@ sidebar = html.Div(
 
 #### ENTITY PAGE CONTENT ##################################################################
 # retrieve entity list
-entity_list = list(pd.read_csv('https://raw.githubusercontent.com/ValaryLim/lynx-blockchain-risk-scoring/tree/master/demo/data/entity_list.csv', sep=',').entity)
+entity_list = list(pd.read_csv('https://raw.githubusercontent.com/ValaryLim/lynx-blockchain-risk-scoring/master/demo/data/entity_list.csv', sep=',').entity)
 entity_list.sort() # sort in alphabetical order
 
 # entity input
@@ -128,7 +128,7 @@ entity_input = html.Div([
 ], style={'width': '30%', 'display': 'inline-block', 'margin-right': 30})
 
 # read sample_risk_data
-sample_risk_data = pd.read_csv('https://raw.githubusercontent.com/ValaryLim/lynx-blockchain-risk-scoring/tree/master/demo/data/entity_risk_score_data.csv', sep=',')
+sample_risk_data = pd.read_csv('https://raw.githubusercontent.com/ValaryLim/lynx-blockchain-risk-scoring/master/demo/data/entity_risk_score_data.csv', sep=',')
 max_date = max(sample_risk_data['date'])
 max_date = datetime.strptime(max_date, '%Y-%m-%d') + timedelta(days=1)
 
@@ -232,7 +232,7 @@ def generate_graph(entity, start_date, end_date):
     '''
 
     # read csv of risk data
-    sample_risk_data = pd.read_csv('https://raw.githubusercontent.com/ValaryLim/lynx-blockchain-risk-scoring/tree/master/demo/data/entity_risk_score_data.csv', sep=',')
+    sample_risk_data = pd.read_csv('https://raw.githubusercontent.com/ValaryLim/lynx-blockchain-risk-scoring/master/demo/data/entity_risk_score_data.csv', sep=',')
     # extract relevant date and entity
     sample_risk_data = sample_risk_data.loc[sample_risk_data['entity']==entity.lower()]
     sample_risk_data = sample_risk_data[(sample_risk_data.date >= start_date) & (sample_risk_data.date <= end_date)]
@@ -296,7 +296,7 @@ def render_entity_page(n_clicks, entity, start_date, end_date):
 
     ##### SCORE DISPLAY #####
     # read csv of risk data
-    sample_risk_data = pd.read_csv('https://raw.githubusercontent.com/ValaryLim/lynx-blockchain-risk-scoring/tree/master/demo/data/entity_risk_score_data.csv', sep=',')
+    sample_risk_data = pd.read_csv('https://raw.githubusercontent.com/ValaryLim/lynx-blockchain-risk-scoring/master/demo/data/entity_risk_score_data.csv', sep=',')
     # extract relevant date and entity
     sample_risk_data = sample_risk_data.loc[sample_risk_data['entity']==entity.lower()]
     sample_risk_data = sample_risk_data[(sample_risk_data.date >= start_date) & (sample_risk_data.date <= end_date)]
@@ -356,7 +356,7 @@ def render_entity_page(n_clicks, entity, start_date, end_date):
     count_graph = html.Div(generate_graph(entity, str(start_date),str(end_date)))
 
     ##### TABLE #####
-    sample_data = pd.read_csv('https://raw.githubusercontent.com/ValaryLim/lynx-blockchain-risk-scoring/tree/master/demo/data/post_data.csv', sep=',', index_col=0)
+    sample_data = pd.read_csv('https://raw.githubusercontent.com/ValaryLim/lynx-blockchain-risk-scoring/master/demo/data/post_data.csv', sep=',', index_col=0)
     
     # Process imported dataframe
     # Get datetime format for df date and filter for range
@@ -459,7 +459,7 @@ def render_overall_page(n_clicks, start_date, end_date):
 
     ##### SCORE DISPLAY #####
     # read csv of risk data
-    sample_risk_data = pd.read_csv('https://raw.githubusercontent.com/ValaryLim/lynx-blockchain-risk-scoring/tree/master/demo/data/entity_risk_score_data.csv', sep=',')
+    sample_risk_data = pd.read_csv('https://raw.githubusercontent.com/ValaryLim/lynx-blockchain-risk-scoring/master/demo/data/entity_risk_score_data.csv', sep=',')
     # extract relevant date and entity
     sample_risk_data = sample_risk_data[(sample_risk_data.date >= start_date) & (sample_risk_data.date <= end_date)]
 
